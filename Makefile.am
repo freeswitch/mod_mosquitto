@@ -1,13 +1,12 @@
-include $(top_srcdir)/build/modmake.rulesam
+AUTOMAKE_OPTIONS = foreign subdir-objects
 MODNAME=mod_mosquitto
 
 if HAVE_MOSQUITTO
 
 mod_LTLIBRARIES = mod_mosquitto.la
 mod_mosquitto_la_SOURCES  = mosquitto_mosq.c mosquitto_events.c mosquitto_utils.c mosquitto_config.c mosquitto_cli.c mod_mosquitto.c
-mod_mosquitto_la_CFLAGS   = $(AM_CFLAGS) $(OPENSSL_CFLAGS) $(MOSQUITTO_CFLAGS)
-mod_mosquitto_la_LIBADD   = $(switch_builddir)/libfreeswitch.la
-mod_mosquitto_la_LDFLAGS  = -avoid-version -module -no-undefined -shared $(OPENSSL_LIBS) $(MOSQUITTO_LIBS) $(SWITCH_AM_LDFLAGS)
+mod_mosquitto_la_CFLAGS   = $(FREESWITCH_CFLAGS) $(OPENSSL_CFLAGS) $(MOSQUITTO_CFLAGS)
+mod_mosquitto_la_LDFLAGS  = -avoid-version -module -no-undefined -shared $(FREESWITCH_LIBS) $(OPENSSL_LIBS) $(MOSQUITTO_LIBS)
 
 else
 install: error
