@@ -72,14 +72,14 @@ To install local modifications to mod_mosquitto:
 
 ## Configuration
 
-All configuration is done within the mosquitto.conf.xml file located in the freeswitch/conf/autoload_configs/mosquitto.conf.xml file.
+All configuration is done within the mosquitto.conf.xml file located in freeswitch/conf/autoload_configs
 
 The configuration follows the standard way all other FreeSWITCH modules are configured.
 
 At a high level, the configuration file is organized as follows:
 
-1.  Global / default settings are specified at the top level.
-2.  One or more profiles can be defined.
+1.  Global settings are specified first.
+2.  One or more profiles are then defined.
 3.  Within each profile, there can be one or more connections, publishers and subscribers defined.
 4.  Within each publisher or subscriber, there can be one or more topics defined.
 5.  Publisher topics can have one or more event parameters
