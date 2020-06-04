@@ -1,16 +1,4 @@
-
-# Table of Contents
-- [Table of Contents](#table-of-contents)
-	- [mod_mosquitto](#mod_mosquitto)
-	- [License](#license)
-	- [Contributor(s):](#contributors)
-	- [Features](#features)
-	- [How to build and install](#how-to-build-and-install)
-	- [Configuration](#configuration)
-	- [Usage](#usage)
-	- [Command Line Interface (CLI)](#command-line-interface-cli)
-	- [Notes](#notes)
-## mod_mosquitto
+# mod_mosquitto
 
 mod_mosquitto is an interface to an MQTT broker using the Eclipse Mosquitto project C client library.  MQTT is a lightweight protocol to send or receive messages using a publish / subscribe pattern.  Echipse Mosquitto is an open source message broker that implements the MQTT protocol.
 
@@ -21,6 +9,17 @@ More information can be found here:
 
 * (MQTT)[http://mqtt.org/]
 * (Mosquitto)[https://mosquitto.org/]
+
+# Table of Contents
+- [Table of Contents](#table-of-contents)
+	- [License](#license)
+	- [Contributor(s):](#contributors)
+	- [Features](#features)
+	- [How to build and install](#how-to-build-and-install)
+	- [Configuration](#configuration)
+	- [Usage](#usage)
+	- [Command Line Interface (CLI)](#command-line-interface-cli)
+	- [Notes](#notes)
 
 ## License
 
