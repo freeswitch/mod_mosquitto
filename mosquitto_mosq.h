@@ -38,8 +38,8 @@
 #ifndef MOSQUITTO_MOSQ_H
 #define MOSQUITTO_MOSQ_H
 
-#include "mosquitto.h"
 #include "mod_mosquitto.h"
+#include "mosquitto.h"
 
 void mosq_callbacks_set(mosquitto_connection_t *connection);
 void mosq_disconnect_callback(struct mosquitto *mosq, void *user_data, int rc);
@@ -48,7 +48,8 @@ void mosq_message_callback(struct mosquitto *mosq, void *user_data, const struct
 void mosq_subscribe_callback(struct mosquitto *mosq, void *userdata, int mid, int qos_count, const int *granted_qos);
 void mosq_log_callback(struct mosquitto *mosq, void *userdata, int level, const char *str);
 void mosq_connect_callback(struct mosquitto *mosq, void *user_data, int result);
-void mosq_publish_results(mosquitto_profile_t *profile, mosquitto_connection_t *connection, mosquitto_topic_t *topic, int rc);
+void mosq_publish_results(mosquitto_profile_t *profile, mosquitto_connection_t *connection, mosquitto_topic_t *topic,
+						  int rc);
 void *SWITCH_THREAD_FUNC bgapi_exec(switch_thread_t *thread, void *obj);
 
 switch_status_t mosq_startup(void);
@@ -68,10 +69,10 @@ switch_status_t mosq_new(mosquitto_profile_t *profile, mosquitto_connection_t *c
 switch_status_t mosq_destroy(mosquitto_connection_t *connection);
 switch_status_t mosq_loop_stop(mosquitto_connection_t *connection, switch_bool_t force);
 switch_status_t mosq_int_option(mosquitto_connection_t *connection);
-switch_status_t mosq_subscribe(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber, mosquitto_topic_t *topic);
+switch_status_t mosq_subscribe(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber,
+							   mosquitto_topic_t *topic);
 
-#endif //MOSQUITTO_MOSQ_H
-
+#endif // MOSQUITTO_MOSQ_H
 
 /* For Emacs:
  * Local Variables:

@@ -37,12 +37,11 @@
 
 #include <switch.h>
 
-#include "mosquitto_utils.h"
 #include "mod_mosquitto.h"
-#include "mosquitto_events.h"
 #include "mosquitto_config.h"
+#include "mosquitto_events.h"
 #include "mosquitto_mosq.h"
-
+#include "mosquitto_utils.h"
 
 /**
  * @brief This function initializes all of the configured profiles.
@@ -59,7 +58,8 @@ switch_status_t initialize_profiles(void)
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
 
 	switch_mutex_lock(mosquitto_globals.profiles_mutex);
-	for (switch_hash_index_t *profiles_hi = switch_core_hash_first(mosquitto_globals.profiles); profiles_hi; profiles_hi = switch_core_hash_next(&profiles_hi)) {
+	for (switch_hash_index_t *profiles_hi = switch_core_hash_first(mosquitto_globals.profiles); profiles_hi;
+		 profiles_hi = switch_core_hash_next(&profiles_hi)) {
 		mosquitto_profile_t *profile = NULL;
 		void *val;
 		switch_core_hash_this(profiles_hi, NULL, NULL, &val);
@@ -76,7 +76,6 @@ switch_status_t initialize_profiles(void)
 
 	return status;
 }
-
 
 /**
  * @brief   This routine starts all of the connections, publishers, subscribers within a profile
@@ -105,7 +104,9 @@ switch_status_t profile_activate(mosquitto_profile_t *profile)
 		if (zstr(profile->log->name)) {
 			log(SWITCH_LOG_ERROR, "Unable to open log for profile %s name is NULL\n", profile->name);
 		} else {
-			status = switch_file_open(&profile->log->logfile, profile->log->name, SWITCH_FOPEN_WRITE|SWITCH_FOPEN_APPEND|SWITCH_FOPEN_CREATE, SWITCH_FPROT_OS_DEFAULT, profile->pool);
+			status = switch_file_open(&profile->log->logfile, profile->log->name,
+									  SWITCH_FOPEN_WRITE | SWITCH_FOPEN_APPEND | SWITCH_FOPEN_CREATE,
+									  SWITCH_FPROT_OS_DEFAULT, profile->pool);
 			if (status != SWITCH_STATUS_SUCCESS) {
 				log(SWITCH_LOG_ERROR, "Failed to open log for profile %s name %s\n", profile->name, profile->log->name);
 			}
@@ -114,7 +115,8 @@ switch_status_t profile_activate(mosquitto_profile_t *profile)
 	switch_mutex_unlock(profile->log->mutex);
 
 	switch_mutex_lock(profile->connections_mutex);
-	for (switch_hash_index_t *connections_hi = switch_core_hash_first(profile->connections); connections_hi; connections_hi = switch_core_hash_next(&connections_hi)) {
+	for (switch_hash_index_t *connections_hi = switch_core_hash_first(profile->connections); connections_hi;
+		 connections_hi = switch_core_hash_next(&connections_hi)) {
 		mosquitto_connection_t *connection = NULL;
 		switch_bool_t force_loop_stop = SWITCH_TRUE;
 		void *val;
@@ -124,7 +126,8 @@ switch_status_t profile_activate(mosquitto_profile_t *profile)
 			log(SWITCH_LOG_INFO, "Profile %s connection %s activation in progress\n", profile->name, connection->name);
 			status = client_connect(profile, connection);
 		} else {
-			log(SWITCH_LOG_INFO, "Profile %s connection %s deactivation in progress\n", profile->name, connection->name);
+			log(SWITCH_LOG_INFO, "Profile %s connection %s deactivation in progress\n", profile->name,
+				connection->name);
 			status = mosq_disconnect(connection, force_loop_stop);
 			mosq_destroy(connection);
 		}
@@ -132,7 +135,8 @@ switch_status_t profile_activate(mosquitto_profile_t *profile)
 	switch_mutex_unlock(profile->connections_mutex);
 
 	switch_mutex_lock(profile->publishers_mutex);
-	for (switch_hash_index_t *publishers_hi = switch_core_hash_first(profile->publishers); publishers_hi; publishers_hi = switch_core_hash_next(&publishers_hi)) {
+	for (switch_hash_index_t *publishers_hi = switch_core_hash_first(profile->publishers); publishers_hi;
+		 publishers_hi = switch_core_hash_next(&publishers_hi)) {
 		mosquitto_publisher_t *publisher = NULL;
 		void *val;
 		switch_core_hash_this(publishers_hi, NULL, NULL, &val);
@@ -148,7 +152,8 @@ switch_status_t profile_activate(mosquitto_profile_t *profile)
 	switch_mutex_unlock(profile->publishers_mutex);
 
 	switch_mutex_lock(profile->subscribers_mutex);
-	for (switch_hash_index_t *subscribers_hi = switch_core_hash_first(profile->subscribers); subscribers_hi; subscribers_hi = switch_core_hash_next(&subscribers_hi)) {
+	for (switch_hash_index_t *subscribers_hi = switch_core_hash_first(profile->subscribers); subscribers_hi;
+		 subscribers_hi = switch_core_hash_next(&subscribers_hi)) {
 		mosquitto_subscriber_t *subscriber = NULL;
 		void *val;
 		switch_core_hash_this(subscribers_hi, NULL, NULL, &val);
@@ -157,7 +162,8 @@ switch_status_t profile_activate(mosquitto_profile_t *profile)
 			log(SWITCH_LOG_INFO, "Profile %s subscriber %s activation in progress\n", profile->name, subscriber->name);
 			status = subscriber_activate(profile, subscriber);
 		} else {
-			log(SWITCH_LOG_INFO, "Profile %s subscriber %s deactivation in progress\n", profile->name, subscriber->name);
+			log(SWITCH_LOG_INFO, "Profile %s subscriber %s deactivation in progress\n", profile->name,
+				subscriber->name);
 			status = subscriber_deactivate(profile, subscriber);
 		}
 	}
@@ -193,15 +199,15 @@ switch_status_t profile_deactivate(mosquitto_profile_t *profile)
 	if (zstr(profile->log->name)) {
 		log(SWITCH_LOG_ERROR, "Unable to close log for profile %s name is NULL\n", profile->name);
 	} else if (profile->log->logfile == NULL) {
-		log(SWITCH_LOG_ERROR, "Unable to close log for profile %s name %s file handle is NULL\n", profile->name, profile->log->name);
+		log(SWITCH_LOG_ERROR, "Unable to close log for profile %s name %s file handle is NULL\n", profile->name,
+			profile->log->name);
 	} else if ((status = switch_file_close(profile->log->logfile)) != SWITCH_STATUS_SUCCESS) {
-	  log(SWITCH_LOG_ERROR, "Failed to close log for profile %s name %s\n", profile->name, profile->log->name);
+		log(SWITCH_LOG_ERROR, "Failed to close log for profile %s name %s\n", profile->name, profile->log->name);
 	}
 	switch_mutex_unlock(profile->log->mutex);
 
 	return status;
 }
-
 
 /**
  * @brief   This routine starts a publisher associated with a profile
@@ -229,7 +235,8 @@ switch_status_t publisher_activate(mosquitto_profile_t *profile, mosquitto_publi
 	}
 
 	switch_mutex_lock(publisher->topics_mutex);
-	for (switch_hash_index_t *topics_hi = switch_core_hash_first(publisher->topics); topics_hi; topics_hi = switch_core_hash_next(&topics_hi)) {
+	for (switch_hash_index_t *topics_hi = switch_core_hash_first(publisher->topics); topics_hi;
+		 topics_hi = switch_core_hash_next(&topics_hi)) {
 		mosquitto_topic_t *topic = NULL;
 		void *val;
 		switch_core_hash_this(topics_hi, NULL, NULL, &val);
@@ -249,7 +256,6 @@ switch_status_t publisher_activate(mosquitto_profile_t *profile, mosquitto_publi
 	return status;
 }
 
-
 /**
  * @brief   This routine binds the events associated with a topic, profile and publisher
  *
@@ -262,7 +268,8 @@ switch_status_t publisher_activate(mosquitto_profile_t *profile, mosquitto_publi
  * @retval	SWITCH_STATUS_SUCCCESS or SWITCH_STATUS_GENERR
  */
 
-switch_status_t publisher_topic_activate(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher, mosquitto_topic_t *topic)
+switch_status_t publisher_topic_activate(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher,
+										 mosquitto_topic_t *topic)
 {
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
 
@@ -277,15 +284,18 @@ switch_status_t publisher_topic_activate(mosquitto_profile_t *profile, mosquitto
 	}
 
 	if (!topic) {
-		log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic not passed to publisher_topic_activate()\n", profile->name, publisher->name);
+		log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic not passed to publisher_topic_activate()\n", profile->name,
+			publisher->name);
 		return SWITCH_STATUS_GENERR;
 	}
 
-	log(SWITCH_LOG_NOTICE, "Profile %s publishser %s topic %s activation in progress\n", profile->name, publisher->name, topic->name);
+	log(SWITCH_LOG_NOTICE, "Profile %s publishser %s topic %s activation in progress\n", profile->name, publisher->name,
+		topic->name);
 
 	if (topic->enable) {
 		switch_mutex_lock(topic->events_mutex);
-		for (switch_hash_index_t *events_hi = switch_core_hash_first(topic->events); events_hi; events_hi = switch_core_hash_next(&events_hi)) {
+		for (switch_hash_index_t *events_hi = switch_core_hash_first(topic->events); events_hi;
+			 events_hi = switch_core_hash_next(&events_hi)) {
 			mosquitto_event_t *event = NULL;
 			void *val;
 			switch_core_hash_this(events_hi, NULL, NULL, &val);
@@ -297,7 +307,6 @@ switch_status_t publisher_topic_activate(mosquitto_profile_t *profile, mosquitto
 
 	return status;
 }
-
 
 /**
  * @brief   This routine deactivates and unbinds the events associated with a topic, profile and publisher
@@ -311,7 +320,8 @@ switch_status_t publisher_topic_activate(mosquitto_profile_t *profile, mosquitto
  * @retval	SWITCH_STATUS_SUCCCESS or SWITCH_STATUS_GENERR
  */
 
-switch_status_t publisher_topic_deactivate(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher, mosquitto_topic_t *topic)
+switch_status_t publisher_topic_deactivate(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher,
+										   mosquitto_topic_t *topic)
 {
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
 
@@ -326,29 +336,31 @@ switch_status_t publisher_topic_deactivate(mosquitto_profile_t *profile, mosquit
 	}
 
 	if (!topic) {
-		log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic not passed to publisher_topic_deactivate()\n", profile->name, publisher->name);
+		log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic not passed to publisher_topic_deactivate()\n",
+			profile->name, publisher->name);
 		return SWITCH_STATUS_GENERR;
 	}
 
-
-	log(SWITCH_LOG_NOTICE, "Profile %s publisher %s topic %s deactivate in progress\n", profile->name, publisher->name, topic->name);
+	log(SWITCH_LOG_NOTICE, "Profile %s publisher %s topic %s deactivate in progress\n", profile->name, publisher->name,
+		topic->name);
 
 	if (topic->enable) {
 		switch_mutex_lock(topic->events_mutex);
-		for (switch_hash_index_t *events_hi = switch_core_hash_first(topic->events); events_hi; events_hi = switch_core_hash_next(&events_hi)) {
+		for (switch_hash_index_t *events_hi = switch_core_hash_first(topic->events); events_hi;
+			 events_hi = switch_core_hash_next(&events_hi)) {
 			mosquitto_event_t *event = NULL;
 			void *val;
 			switch_core_hash_this(events_hi, NULL, NULL, &val);
 			event = (mosquitto_event_t *)val;
-			log(SWITCH_LOG_NOTICE, "Profile %s publisher %s topic %s event %s unbind %d\n", profile->name, publisher->name, topic->name, event->name, status);
-			//status = unbind_event(profile, publisher, topic, event);
+			log(SWITCH_LOG_NOTICE, "Profile %s publisher %s topic %s event %s unbind %d\n", profile->name,
+				publisher->name, topic->name, event->name, status);
+			// status = unbind_event(profile, publisher, topic, event);
 		}
 		switch_mutex_unlock(topic->events_mutex);
 	}
 
 	return status;
 }
-
 
 /**
  * @brief   TODO: This routine deactivates the publisher associated with the specified profile
@@ -405,7 +417,8 @@ switch_status_t subscriber_activate(mosquitto_profile_t *profile, mosquitto_subs
 	}
 
 	switch_mutex_lock(subscriber->topics_mutex);
-	for (switch_hash_index_t *topics_hi = switch_core_hash_first(subscriber->topics); topics_hi; topics_hi = switch_core_hash_next(&topics_hi)) {
+	for (switch_hash_index_t *topics_hi = switch_core_hash_first(subscriber->topics); topics_hi;
+		 topics_hi = switch_core_hash_next(&topics_hi)) {
 		mosquitto_topic_t *topic = NULL;
 		void *val;
 		switch_core_hash_this(topics_hi, NULL, NULL, &val);
@@ -425,7 +438,6 @@ switch_status_t subscriber_activate(mosquitto_profile_t *profile, mosquitto_subs
 	return status;
 }
 
-
 /**
  * @brief   This routine binds the events associated with a topic, profile and subscriber
  *
@@ -438,7 +450,8 @@ switch_status_t subscriber_activate(mosquitto_profile_t *profile, mosquitto_subs
  * @retval  SWITCH_STATUS_SUCCCESS or SWITCH_STATUS_GENERR
  */
 
-switch_status_t subscriber_topic_activate(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber, mosquitto_topic_t *topic)
+switch_status_t subscriber_topic_activate(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber,
+										  mosquitto_topic_t *topic)
 {
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
 
@@ -453,18 +466,19 @@ switch_status_t subscriber_topic_activate(mosquitto_profile_t *profile, mosquitt
 	}
 
 	if (!topic) {
-		log(SWITCH_LOG_ERROR, "Profile %s subscriber %s topic not passed to subscriber_deactivate()\n", profile->name, subscriber->name);
+		log(SWITCH_LOG_ERROR, "Profile %s subscriber %s topic not passed to subscriber_deactivate()\n", profile->name,
+			subscriber->name);
 		return SWITCH_STATUS_GENERR;
 	}
 
 	if (topic->enable) {
-		log(SWITCH_LOG_INFO, "Profile %s subscriber %s topic %s pattern %s qos %d activate in progress\n", profile->name, subscriber->name, topic->name, topic->pattern, topic->qos);
+		log(SWITCH_LOG_INFO, "Profile %s subscriber %s topic %s pattern %s qos %d activate in progress\n",
+			profile->name, subscriber->name, topic->name, topic->pattern, topic->qos);
 		status = mosq_subscribe(profile, subscriber, topic);
 	}
 
 	return status;
 }
-
 
 /**
  * @brief   TODO: This routine deactivates the subscriber associated with the specified profile
@@ -477,7 +491,8 @@ switch_status_t subscriber_topic_activate(mosquitto_profile_t *profile, mosquitt
  * @retval	SWITCH_STATUS_SUCCCESS or SWITCH_STATUS_GENERR
  */
 
-switch_status_t subscriber_topic_deactivate(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber, mosquitto_topic_t *topic)
+switch_status_t subscriber_topic_deactivate(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber,
+											mosquitto_topic_t *topic)
 {
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
 
@@ -492,11 +507,13 @@ switch_status_t subscriber_topic_deactivate(mosquitto_profile_t *profile, mosqui
 	}
 
 	if (!topic) {
-		log(SWITCH_LOG_ERROR, "Profile %s subscriber %s topic not passed to subscriber_topic_deactivate()\n", profile->name, subscriber->name);
+		log(SWITCH_LOG_ERROR, "Profile %s subscriber %s topic not passed to subscriber_topic_deactivate()\n",
+			profile->name, subscriber->name);
 		return SWITCH_STATUS_GENERR;
 	}
 
-	log(SWITCH_LOG_INFO, "Profile %s subscriber %s topic %s pattern %s qos %d deactivate in progress\n", profile->name, subscriber->name, topic->name, topic->pattern, topic->qos);
+	log(SWITCH_LOG_INFO, "Profile %s subscriber %s topic %s pattern %s qos %d deactivate in progress\n", profile->name,
+		subscriber->name, topic->name, topic->pattern, topic->qos);
 
 	return status;
 }
@@ -530,11 +547,11 @@ switch_status_t subscriber_deactivate(mosquitto_profile_t *profile, mosquitto_su
 	return status;
 }
 
-
 /**
  * @brief   This routine attempts to connect to an MQTT broker
  *
- * @details This routine sets up connection properties/options and then calls the routine to perform the actual connection
+ * @details This routine sets up connection properties/options and then calls the routine to perform the actual
+ * connection
  *
  * @param[in]   *profile	Pointer to the profile hash
  * @param[in]   *connection Pointer to the connection associated with the specified profile
@@ -568,12 +585,11 @@ switch_status_t client_connect(mosquitto_profile_t *profile, mosquitto_connectio
 	return status;
 }
 
-
 /**
  * @brief   This routine tries to locate the subscriber fromm an inbound message
  *
- * @details Received messages only have the connection and topic available.  This routine searches for the associated subscriber
- *			so that the message can be processes.
+ * @details Received messages only have the connection and topic available.  This routine searches for the associated
+ *subscriber so that the message can be processes.
  *
  * @param[in]   *profile	Pointer to the profile hash
  * @param[in]   *connection Pointer to the connection associated with the specified profile
@@ -582,7 +598,8 @@ switch_status_t client_connect(mosquitto_profile_t *profile, mosquitto_connectio
  * @retval  SWITCH_STATUS_SUCCCESS or SWITCH_STATUS_GENERR
  */
 
-mosquitto_topic_t *locate_connection_topic(mosquitto_profile_t *profile, mosquitto_connection_t *connection, const char *name)
+mosquitto_topic_t *locate_connection_topic(mosquitto_profile_t *profile, mosquitto_connection_t *connection,
+										   const char *name)
 {
 	mosquitto_topic_t *found_topic = NULL;
 
@@ -597,31 +614,31 @@ mosquitto_topic_t *locate_connection_topic(mosquitto_profile_t *profile, mosquit
 	}
 
 	if (zstr(name)) {
-		log(SWITCH_LOG_ERROR, "Profile %s connection %s topic name is NULL for locate_connection_topic()\n", profile->name, connection->name);
+		log(SWITCH_LOG_ERROR, "Profile %s connection %s topic name is NULL for locate_connection_topic()\n",
+			profile->name, connection->name);
 		return found_topic;
 	}
 
 	switch_mutex_lock(profile->subscribers_mutex);
-	for (switch_hash_index_t *subscribers_hi = switch_core_hash_first(profile->subscribers); subscribers_hi; subscribers_hi = switch_core_hash_next(&subscribers_hi)) {
+	for (switch_hash_index_t *subscribers_hi = switch_core_hash_first(profile->subscribers); subscribers_hi;
+		 subscribers_hi = switch_core_hash_next(&subscribers_hi)) {
 		mosquitto_subscriber_t *subscriber = NULL;
 		void *val;
 		switch_core_hash_this(subscribers_hi, NULL, NULL, &val);
 		subscriber = (mosquitto_subscriber_t *)val;
-		if (!subscriber->enable) {
-			continue;
-		}
+		if (!subscriber->enable) { continue; }
 		switch_mutex_lock(subscriber->topics_mutex);
-		for (switch_hash_index_t *topics_hi = switch_core_hash_first(subscriber->topics); topics_hi; topics_hi = switch_core_hash_next(&topics_hi)) {
+		for (switch_hash_index_t *topics_hi = switch_core_hash_first(subscriber->topics); topics_hi;
+			 topics_hi = switch_core_hash_next(&topics_hi)) {
 			mosquitto_topic_t *topic;
 			void *val;
 			switch_core_hash_this(topics_hi, NULL, NULL, &val);
 			topic = (mosquitto_topic_t *)val;
-			if (!topic->enable) {
-				continue;
-			}
+			if (!topic->enable) { continue; }
 			if (!strcasecmp(topic->connection_name, connection->name)) {
 				if (!strcasecmp(topic->pattern, name)) {
-					log(SWITCH_LOG_INFO, "Profile %s connection %s topic %s pattern %s found\n", profile->name,  connection->name, topic->name, topic->pattern);
+					log(SWITCH_LOG_INFO, "Profile %s connection %s topic %s pattern %s found\n", profile->name,
+						connection->name, topic->name, topic->pattern);
 					found_topic = topic;
 					break;
 				}
@@ -633,7 +650,6 @@ mosquitto_topic_t *locate_connection_topic(mosquitto_profile_t *profile, mosquit
 
 	return found_topic;
 }
-
 
 /**
  * @brief   This routine attempts to reinitialize a connection associated with the specified profile
@@ -682,24 +698,18 @@ int mosquitto_log(int severity, const char *format, ...)
 	int ret;
 	char *data;
 
-	if (!mosquitto_globals.log.enable) {
-		return -1;
-	}
+	if (!mosquitto_globals.log.enable) { return -1; }
 
-	if (severity > mosquitto_globals.log.level) {
-		return -1;
-	}
+	if (severity > mosquitto_globals.log.level) { return -1; }
 
-	if (mosquitto_globals.log.logfile == NULL) {
-		return -1;
-	}
+	if (mosquitto_globals.log.logfile == NULL) { return -1; }
 
 	switch_mutex_lock(mosquitto_globals.log.mutex);
 
 	switch_time_exp_lt(&tm, switch_micro_time_now());
-	switch_file_printf(mosquitto_globals.log.logfile, "%04u-%02u-%02uT%02u:%02u:%02u.%06u%+03d%02d ",
-		tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
-		tm.tm_hour, tm.tm_min, tm.tm_sec, tm.tm_usec, tm.tm_gmtoff / 3600, tm.tm_gmtoff % 3600);
+	switch_file_printf(mosquitto_globals.log.logfile, "%04u-%02u-%02uT%02u:%02u:%02u.%06u%+03d%02d ", tm.tm_year + 1900,
+					   tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, tm.tm_usec, tm.tm_gmtoff / 3600,
+					   tm.tm_gmtoff % 3600);
 
 	va_start(ap, format);
 
@@ -714,9 +724,7 @@ int mosquitto_log(int severity, const char *format, ...)
 	switch_mutex_unlock(mosquitto_globals.log.mutex);
 
 	return ret;
-
 }
-
 
 int profile_log(int severity, mosquitto_profile_t *profile, const char *format, ...)
 {
@@ -726,32 +734,22 @@ int profile_log(int severity, mosquitto_profile_t *profile, const char *format, 
 	int ret;
 	char *data;
 
-	if (!profile) {
-		return -1;
-	}
+	if (!profile) { return -1; }
 
-	if (!profile->log->enable) {
-		return -1;
-	}
+	if (!profile->log->enable) { return -1; }
 
-	if (severity > profile->log->level) {
-		return -1;
-	}
+	if (severity > profile->log->level) { return -1; }
 
-	if (zstr(profile->log->name)) {
-		return -1;
-	}
+	if (zstr(profile->log->name)) { return -1; }
 
-	if (profile->log->logfile == NULL) {
-		return -1;
-	}
+	if (profile->log->logfile == NULL) { return -1; }
 
 	switch_mutex_lock(profile->log->mutex);
 
 	switch_time_exp_lt(&tm, switch_micro_time_now());
-	switch_file_printf(profile->log->logfile, "%04u-%02u-%02uT%02u:%02u:%02u.%06u%+03d%02d ",
-		tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
-		tm.tm_hour, tm.tm_min, tm.tm_sec, tm.tm_usec, tm.tm_gmtoff / 3600, tm.tm_gmtoff % 3600);
+	switch_file_printf(profile->log->logfile, "%04u-%02u-%02uT%02u:%02u:%02u.%06u%+03d%02d ", tm.tm_year + 1900,
+					   tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, tm.tm_usec, tm.tm_gmtoff / 3600,
+					   tm.tm_gmtoff % 3600);
 
 	va_start(ap, format);
 
@@ -766,7 +764,6 @@ int profile_log(int severity, mosquitto_profile_t *profile, const char *format, 
 	switch_mutex_unlock(profile->log->mutex);
 
 	return ret;
-
 }
 
 /* For Emacs:

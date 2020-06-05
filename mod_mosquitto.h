@@ -38,24 +38,22 @@
 #ifndef MOD_MOSQUITTO_H
 #define MOD_MOSQUITTO_H
 
-#define log(severity, ...) \
-	if (severity <= mosquitto_globals.log.level) { \
-		 switch_log_printf(SWITCH_CHANNEL_LOG, severity, __VA_ARGS__); \
-	}
+#define log(severity, ...)                                                                                             \
+	if (severity <= mosquitto_globals.log.level) { switch_log_printf(SWITCH_CHANNEL_LOG, severity, __VA_ARGS__); }
 
 #ifndef HAVE_OPENSSL
-#define SSL_VERIFY_NONE	0
-#define SSL_VERIFY_PEER	1
+#define SSL_VERIFY_NONE 0
+#define SSL_VERIFY_PEER 1
 #endif
 
-#define MOSQUITTO_LOG_FILE			"mosquitto.log"
-#define MOSQUITTO_CONFIG_FILE		"mosquitto.conf"
-#define MOSQUITTO_DEFAULT_PROFILE	"default"
-#define EVENT_QUEUE_SIZE			50000
-#define RANDOM_STRING_LENGTH		127
-#define DESTINATION_STRING_LENGTH	255
-#define	UNIQUE_STRING_LENGTH		32
-#define MAX_EVENT_ID_LENGTH			255		// profile->name + publisher->name + topic->name
+#define MOSQUITTO_LOG_FILE "mosquitto.log"
+#define MOSQUITTO_CONFIG_FILE "mosquitto.conf"
+#define MOSQUITTO_DEFAULT_PROFILE "default"
+#define EVENT_QUEUE_SIZE 50000
+#define RANDOM_STRING_LENGTH 127
+#define DESTINATION_STRING_LENGTH 255
+#define UNIQUE_STRING_LENGTH 32
+#define MAX_EVENT_ID_LENGTH 255 // profile->name + publisher->name + topic->name
 
 typedef struct mosquitto_tls_s mosquitto_tls_t;
 typedef struct mosquitto_profile_s mosquitto_profile_t;
@@ -71,14 +69,13 @@ typedef struct mosquitto_topic_s mosquitto_topic_t;
 typedef struct mosquitto_mosq_userdata_s mosquitto_mosq_userdata_t;
 typedef struct mosquitto_log_s mosquitto_log_t;
 
-
 struct mosquitto_bgapi_s {
-    char *cmd;
-    char *arg;
+	char *cmd;
+	char *arg;
 	switch_uuid_t uuid;
 	char uuid_cli[SWITCH_UUID_FORMATTED_LENGTH + 1];
-    char uuid_str[SWITCH_UUID_FORMATTED_LENGTH + 1];
-    switch_memory_pool_t *pool;
+	char uuid_str[SWITCH_UUID_FORMATTED_LENGTH + 1];
+	switch_memory_pool_t *pool;
 };
 
 struct mosquitto_lib_s {
@@ -101,7 +98,7 @@ struct mosquitto_event_s {
 	switch_event_types_t event_type;
 	switch_event_node_t *node;
 	mosquitto_event_userdata_t *userdata;
-	char event_id[MAX_EVENT_ID_LENGTH];		// profile->name + publisher->name + topic->name
+	char event_id[MAX_EVENT_ID_LENGTH]; // profile->name + publisher->name + topic->name
 	switch_bool_t bound;
 	unsigned count;
 };
@@ -287,4 +284,3 @@ extern struct globals_s mosquitto_globals;
  * For VIM:
  * vim:set softtabstop=4 shiftwidth=4 tabstop=4:
  */
-
