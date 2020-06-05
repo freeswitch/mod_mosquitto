@@ -1246,18 +1246,12 @@ switch_status_t mosq_new(mosquitto_profile_t *profile, mosquitto_connection_t *c
 		return SWITCH_STATUS_SUCCESS;
 	}
 
-	/*
 	if (!(userdata = (mosquitto_mosq_userdata_t *)switch_core_alloc(profile->pool, sizeof(mosquitto_mosq_userdata_t)))) {
 		log(SWITCH_LOG_CRIT, "mosq_new() Failed to allocate memory for mosquitto_new() userdata structure profile %s connection %s\n", profile->name, connection->name);
 		return SWITCH_STATUS_GENERR;
-	} else {
-		connection->userdata = userdata;
-		userdata->profile = profile;
-		userdata->connection = connection;
 	}
-	*/
+	//switch_malloc(userdata, sizeof(mosquitto_mosq_userdata_t));
 
-	switch_malloc(userdata, sizeof(mosquitto_mosq_userdata_t));
 	connection->userdata = userdata;
 	userdata->profile = profile;
 	userdata->connection = connection;
@@ -1335,7 +1329,7 @@ switch_status_t mosq_destroy(mosquitto_connection_t *connection)
 	  }
 	  profile = (mosquitto_profile_t *)userdata->profile;
 	  log(SWITCH_LOG_DEBUG, "mosq_destroy(): profile %s connection %s\n", profile->name, connection->name);
-      switch_safe_free(connection->userdata);
+      // switch_safe_free(connection->userdata);
 	#endif
 
 	mosquitto_destroy(connection->mosq);
