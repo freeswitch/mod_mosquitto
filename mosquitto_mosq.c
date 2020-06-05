@@ -185,9 +185,9 @@ static switch_status_t process_originate_message(mosquitto_mosq_userdata_t *user
 	#if SWITCH_API_VERSION < 5
 	  status = switch_ivr_originate(session, NULL, &cause, NULL, timeout, NULL, cid_name, cid_number, NULL, originate_vars, SOF_NONE, NULL);
 	#else
-	status = switch_ivr_originate(NULL, &session, &cause, aleg, timeout, NULL, NULL, NULL, NULL, originate_vars, SOF_NONE, NULL, NULL);
+	  status = switch_ivr_originate(NULL, &session, &cause, aleg, timeout, NULL, NULL, NULL, NULL, originate_vars, SOF_NONE, NULL, NULL);
 	#endif
-	
+
 	if (status != SWITCH_STATUS_SUCCESS || !session) {
 		log(SWITCH_LOG_WARNING, "Originate to [%s] failed, cause: %s\n", aleg, switch_channel_cause2str(cause));
 		return status;
