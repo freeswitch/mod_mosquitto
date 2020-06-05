@@ -182,8 +182,12 @@ static switch_status_t process_originate_message(mosquitto_mosq_userdata_t *user
 	aleg = argv[1];
 	bleg = argv[2];
 
-	//status = switch_ivr_originate(session, NULL, &cause, NULL, timeout, NULL, cid_name, cid_number, NULL, originate_vars, SOF_NONE, NULL);
-	status = switch_ivr_originate(NULL, &session, &cause, aleg, timeout, NULL, NULL, NULL, NULL, originate_vars, SOF_NONE, NULL, NULL);
+	#if SWITCH_API_VERSION < 5
+	  status = switch_ivr_originate(session, NULL, &cause, NULL, timeout, NULL, cid_name, cid_number, NULL, originate_vars, SOF_NONE, NULL);
+	#else
+	  status = switch_ivr_originate(NULL, &session, &cause, aleg, timeout, NULL, NULL, NULL, NULL, originate_vars, SOF_NONE, NULL, NULL);
+	#endif
+
 	if (status != SWITCH_STATUS_SUCCESS || !session) {
 		log(SWITCH_LOG_WARNING, "Originate to [%s] failed, cause: %s\n", aleg, switch_channel_cause2str(cause));
 		return status;
@@ -586,20 +590,23 @@ switch_status_t mosq_int_option(mosquitto_connection_t *connection)
 {
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
 	int rc;
+	int protocol_version = MQTT_PROTOCOL_V31;
 
-	/*
 	if (!strncasecmp(connection->protocol_version, "V311", 4)) {
 		protocol_version = MQTT_PROTOCOL_V311;
 	}
-	*/
 
 	/*
 	* mosq	A valid mosquitto instance.
 	* option	The option to set.
 	* value	The option specific value.
 	*/
-	rc = mosquitto_int_option(connection->mosq, MOSQ_OPT_PROTOCOL_VERSION, MQTT_PROTOCOL_V311);
-	log(SWITCH_LOG_DEBUG, "mosquitto_init_option() for Profile %s connection %s protocol version %s rc %d\n", connection->profile_name, connection->name, connection->protocol_version, rc);
+    #if LIBMOSQUITTO_VERSION_NUMBER < 1006008
+      rc = mosquitto_opts_set(connection->mosq, MOSQ_OPT_PROTOCOL_VERSION, &protocol_version);
+    #else
+      rc = mosquitto_int_option(connection->mosq, MOSQ_OPT_PROTOCOL_VERSION, protocol_version);
+    #endif
+	log(SWITCH_LOG_DEBUG, "Options set for Profile %s connection %s protocol version %s rc %d\n", connection->profile_name, connection->name, connection->protocol_version, rc);
 
 	/*
 	rc = mosquitto_init_option(connection->mosq, MOSQ_OPT_RECEIVE_MAXIMUM, connection->receive_maximum);
@@ -1239,18 +1246,12 @@ switch_status_t mosq_new(mosquitto_profile_t *profile, mosquitto_connection_t *c
 		return SWITCH_STATUS_SUCCESS;
 	}
 
-	/*
 	if (!(userdata = (mosquitto_mosq_userdata_t *)switch_core_alloc(profile->pool, sizeof(mosquitto_mosq_userdata_t)))) {
 		log(SWITCH_LOG_CRIT, "mosq_new() Failed to allocate memory for mosquitto_new() userdata structure profile %s connection %s\n", profile->name, connection->name);
 		return SWITCH_STATUS_GENERR;
-	} else {
-		connection->userdata = userdata;
-		userdata->profile = profile;
-		userdata->connection = connection;
 	}
-	*/
+	//switch_malloc(userdata, sizeof(mosquitto_mosq_userdata_t));
 
-	switch_malloc(userdata, sizeof(mosquitto_mosq_userdata_t));
 	connection->userdata = userdata;
 	userdata->profile = profile;
 	userdata->connection = connection;
@@ -1320,17 +1321,17 @@ switch_status_t mosq_destroy(mosquitto_connection_t *connection)
 		return SWITCH_STATUS_GENERR;
 	}
 	
-	userdata = mosquitto_userdata(connection->mosq);
-	if (!userdata) {
-		log(SWITCH_LOG_ERROR, "mosq_destroy() called with NULL userdata pointer\n");
-		return SWITCH_STATUS_GENERR;
-	}
+	#if LIBMOSQUITTO_VERSION_NUMBER >= 1006008
+	  userdata = mosquitto_userdata(connection->mosq);
+	  if (!userdata) {
+	  	  log(SWITCH_LOG_ERROR, "mosq_destroy() called with NULL userdata pointer\n");
+		  return SWITCH_STATUS_GENERR;
+	  }
+	  profile = (mosquitto_profile_t *)userdata->profile;
+	  log(SWITCH_LOG_DEBUG, "mosq_destroy(): profile %s connection %s\n", profile->name, connection->name);
+      // switch_safe_free(connection->userdata);
+	#endif
 
-	profile = (mosquitto_profile_t *)userdata->profile;
-
-	log(SWITCH_LOG_DEBUG, "mosq_destroy(): profile %s connection %s\n", profile->name, connection->name);
-
-	switch_safe_free(connection->userdata);
 	mosquitto_destroy(connection->mosq);
 	connection->mosq = NULL;
 	connection->connected = SWITCH_FALSE;
@@ -1427,11 +1428,13 @@ switch_status_t mosq_subscribe(mosquitto_profile_t *profile, mosquitto_subscribe
 			topic->subscribed = SWITCH_FALSE;
 			return SWITCH_STATUS_GENERR;
 			break;
+		#if LIBMOSQUITTO_VERSION_NUMBER >= 1006008
 		case MOSQ_ERR_OVERSIZE_PACKET:
 			log(SWITCH_LOG_ERROR, "Profile %s subscriber %s connection %s topic %s pattern %s the pattern larger than the MQTT broker can support\n", profile->name, subscriber->name, connection->name, topic->name, topic->pattern);
 			topic->subscribed = SWITCH_FALSE;
 			return SWITCH_STATUS_GENERR;
 			break;
+		#endif
 	}
 
 	return status;
