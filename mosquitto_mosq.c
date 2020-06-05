@@ -592,11 +592,9 @@ switch_status_t mosq_int_option(mosquitto_connection_t *connection)
 	int rc;
 	int protocol_version = MQTT_PROTOCOL_V31;
 
-	/*
 	if (!strncasecmp(connection->protocol_version, "V311", 4)) {
 		protocol_version = MQTT_PROTOCOL_V311;
 	}
-	*/
 
 	/*
 	* mosq	A valid mosquitto instance.
