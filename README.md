@@ -514,7 +514,7 @@ Notes:
   1.  The topic `name` must be unique within a profile.
   2.  The topic can be enabled  or disabled by setting the `enable` param.
   3.  The connection `name` must reference a connection previously defined in the configuration file.
-  4.  The `pattern`` must comply with MQTT standards.
+  4.  The `pattern` must comply with MQTT standards.
   5.  The `qos` value must comply with MQTT standards. Value 0, 1 or 2 indicating the Quality of Service to be used.
   6.  The `originate_authorized` / `bgapi_authorized` permission flags.
     WARNING: Allowing either of these settings WILL allow phone calls to be initiated by the MQTT broker to FreeSWITCH.
