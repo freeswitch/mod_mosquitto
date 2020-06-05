@@ -71,12 +71,13 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_mosquitto_load) {
 	memset(&mosquitto_globals, 0, sizeof(mosquitto_globals));
 	mosquitto_globals.pool = pool;
 
+	switch_thread_rwlock_create(&mosquitto_globals.bgapi_rwlock, mosquitto_globals.pool);
 	switch_mutex_init(&mosquitto_globals.mutex, SWITCH_MUTEX_DEFAULT, mosquitto_globals.pool);
 	switch_mutex_init(&mosquitto_globals.log.mutex, SWITCH_MUTEX_DEFAULT, mosquitto_globals.pool);
 	switch_mutex_init(&mosquitto_globals.profiles_mutex, SWITCH_MUTEX_NESTED, mosquitto_globals.pool);
-	switch_thread_rwlock_create(&mosquitto_globals.bgapi_rwlock, mosquitto_globals.pool);
-	switch_core_hash_init(&mosquitto_globals.profiles);
 	switch_queue_create(&mosquitto_globals.event_queue, mosquitto_globals.event_queue_size, mosquitto_globals.pool);
+
+	switch_core_hash_init(&mosquitto_globals.profiles);
 
 	/* create a loadable module interface structure named with modname */
 	/* the module interface defines the different interfaces that this module has defined */

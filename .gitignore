@@ -60,3 +60,4 @@ missing
 test-driver
 core.*
 TAGS
+.vscode/c_cpp_properties.json
