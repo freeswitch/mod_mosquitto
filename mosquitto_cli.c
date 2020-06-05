@@ -592,8 +592,8 @@ static switch_status_t cmd_status(char **argv, int argc, switch_stream_handle_t 
 
 	stream->write_function(stream, "%s\n", line);
 	stream->write_function(stream, "mosquitto library version: %d.%d.%d\n", mosquitto_globals.mosquitto_lib.major, mosquitto_globals.mosquitto_lib.minor, mosquitto_globals.mosquitto_lib.revision);
-	stream->write_function(stream, "libmosquitto version: %d\n", LIBMOSQUITTO_VERSION_NUMBER);
-	stream->write_function(stream, "switch api version: %d\n", SWITCH_API_VERSION);
+	stream->write_function(stream, "LIBMOSQUITTO_VERSION_NUMBER: %d\n", LIBMOSQUITTO_VERSION_NUMBER);
+	stream->write_function(stream, "SWITCH_API_VERSION: %d\n", SWITCH_API_VERSION);
 	stream->write_function(stream, "settings\n");
 	stream->write_function(stream, "  log-enable: %s\n", mosquitto_globals.log.enable ? "True" : "False");
 	stream->write_function(stream, "  log-details: %s\n", mosquitto_globals.log.details ? "True" : "False");

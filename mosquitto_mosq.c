@@ -590,6 +590,7 @@ switch_status_t mosq_int_option(mosquitto_connection_t *connection)
 {
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
 	int rc;
+	int protocol_version = MQTT_PROTOCOL_V31
 
 	/*
 	if (!strncasecmp(connection->protocol_version, "V311", 4)) {
@@ -602,8 +603,12 @@ switch_status_t mosq_int_option(mosquitto_connection_t *connection)
 	* option	The option to set.
 	* value	The option specific value.
 	*/
-	rc = mosquitto_int_option(connection->mosq, MOSQ_OPT_PROTOCOL_VERSION, MQTT_PROTOCOL_V311);
-	log(SWITCH_LOG_DEBUG, "mosquitto_init_option() for Profile %s connection %s protocol version %s rc %d\n", connection->profile_name, connection->name, connection->protocol_version, rc);
+    #if LIBMOSQUITTO_VERSION_NUMBER < 1006008
+      rc = mosquitto_opts_set(connection->mosq, MOSQ_OPT_PROTOCOL_VERSION, &protocol_version);
+    #else
+      rc = mosquitto_int_option(connection->mosq, MOSQ_OPT_PROTOCOL_VERSION, protocol_version);
+    #endif
+	log(SWITCH_LOG_DEBUG, "Options set for Profile %s connection %s protocol version %s rc %d\n", connection->profile_name, connection->name, connection->protocol_version, rc);
 
 	/*
 	rc = mosquitto_init_option(connection->mosq, MOSQ_OPT_RECEIVE_MAXIMUM, connection->receive_maximum);
@@ -1431,11 +1436,13 @@ switch_status_t mosq_subscribe(mosquitto_profile_t *profile, mosquitto_subscribe
 			topic->subscribed = SWITCH_FALSE;
 			return SWITCH_STATUS_GENERR;
 			break;
+		#if LIBMOSQUITTO_VERSION_NUMBER >= 1006008
 		case MOSQ_ERR_OVERSIZE_PACKET:
 			log(SWITCH_LOG_ERROR, "Profile %s subscriber %s connection %s topic %s pattern %s the pattern larger than the MQTT broker can support\n", profile->name, subscriber->name, connection->name, topic->name, topic->pattern);
 			topic->subscribed = SWITCH_FALSE;
 			return SWITCH_STATUS_GENERR;
 			break;
+		#endif
 	}
 
 	return status;
