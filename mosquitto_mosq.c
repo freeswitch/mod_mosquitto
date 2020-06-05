@@ -1327,15 +1327,15 @@ switch_status_t mosq_destroy(mosquitto_connection_t *connection)
 		return SWITCH_STATUS_GENERR;
 	}
 	
-	userdata = mosquitto_userdata(connection->mosq);
-	if (!userdata) {
-		log(SWITCH_LOG_ERROR, "mosq_destroy() called with NULL userdata pointer\n");
-		return SWITCH_STATUS_GENERR;
-	}
-
-	profile = (mosquitto_profile_t *)userdata->profile;
-
-	log(SWITCH_LOG_DEBUG, "mosq_destroy(): profile %s connection %s\n", profile->name, connection->name);
+	#if LIBMOSQUITTO_VERSION_NUMBER >= 1006008
+	  userdata = mosquitto_userdata(connection->mosq);
+	  if (!userdata) {
+	  	  log(SWITCH_LOG_ERROR, "mosq_destroy() called with NULL userdata pointer\n");
+		  return SWITCH_STATUS_GENERR;
+	  }
+	  profile = (mosquitto_profile_t *)userdata->profile;
+	  log(SWITCH_LOG_DEBUG, "mosq_destroy(): profile %s connection %s\n", profile->name, connection->name);
+	#endif
 
 	switch_safe_free(connection->userdata);
 	mosquitto_destroy(connection->mosq);
