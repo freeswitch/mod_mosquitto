@@ -1033,7 +1033,7 @@ switch_status_t mosq_connect(mosquitto_connection_t *connection)
 	unsigned port;
 
 	if (!connection) {
-		log(SWITCH_LOG_ERROR, "mosq_connect() profile %s failed because connection name is NULL\n", connection->profile_name);
+		log(SWITCH_LOG_ERROR, "mosq_connect() failed because connection name is NULL\n");
 		return SWITCH_STATUS_GENERR;
 	}
 
@@ -1130,7 +1130,7 @@ switch_status_t mosq_loop_stop(mosquitto_connection_t *connection, switch_bool_t
 	* This is part of the threaded client interface.
 	* Call this once to stop the network thread previously created with mosquitto_loop_start.
 	* This call will block until the network thread finishes.
-	* For the network thread to end, you must have previously called mosquitto_disconnect or have set the 
+	* For the network thread to end, you must have previously called mosquitto_disconnect or have set the
 	* force parameter to true.
     *
 	* mosq	A valid mosquitto instance.
@@ -1256,13 +1256,11 @@ switch_status_t mosq_new(mosquitto_profile_t *profile, mosquitto_connection_t *c
 	userdata->profile = profile;
 	userdata->connection = connection;
 
-	if (connection->client_id == NULL) {
-		if (connection->clean_session == SWITCH_FALSE) {
-			log(SWITCH_LOG_INFO, "mosquitto_new() profile %s connection %s called with NULL client_id, forcing clean_session to TRUE\n", profile->name, connection->name);
-			clean_session = SWITCH_TRUE;
-		}
-	}
-	clean_session = connection->clean_session;
+	if (connection->client_id != NULL) {
+		clean_session = connection->clean_session;
+	} else {
+		log(SWITCH_LOG_INFO, "mosquitto_new() profile %s connection %s called with NULL client_id, forcing clean_session to TRUE\n", profile->name, connection->name);
+    }
 
 	log(SWITCH_LOG_DEBUG, "mosquitto_new() being called with profile %s connection %s clean_session %s client_id %s\n", profile->name, connection->name, clean_session ? "True" : "False", connection->client_id);
 
@@ -1297,7 +1295,7 @@ switch_status_t mosq_new(mosquitto_profile_t *profile, mosquitto_connection_t *c
 /**
  * @brief   This routine frees memory associated with a mosquitto client instance
  *
- * @details This routine frees memowy associated with a mosquitto client instance and also frees memory allocated 
+ * @details This routine frees memowy associated with a mosquitto client instance and also frees memory allocated
  *          for the userdata structure associated with this client instance
  *
  * @param[in]   *mosq	Pointer to the mosquitto client instance
@@ -1320,7 +1318,7 @@ switch_status_t mosq_destroy(mosquitto_connection_t *connection)
 		log(SWITCH_LOG_ERROR, "mosq_destroy() called with NULL mosquitto client instance\n");
 		return SWITCH_STATUS_GENERR;
 	}
-	
+
 	#if LIBMOSQUITTO_VERSION_NUMBER >= 1006008
 	  userdata = mosquitto_userdata(connection->mosq);
 	  if (!userdata) {
@@ -1536,7 +1534,7 @@ switch_status_t mosq_startup(void)
 	} else {
 		status = initialize_profiles();
 	}
-	
+
 	return status;
 }
 
