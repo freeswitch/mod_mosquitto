@@ -1,6 +1,6 @@
 # mod_mosquitto
 
-mod_mosquitto is an interface to an MQTT broker using the Eclipse Mosquitto project C client library.  MQTT is a lightweight protocol to send or receive messages using a publish/subscribe (pub/sub) design pattern.  Eclipse Mosquitto is an open source message broker that implements the MQTT protocol.
+mod_mosquitto is a FreeSWITCH interface to an MQTT broker using the Eclipse Mosquitto project C client library.  MQTT is a lightweight protocol to send or receive messages using a publish/subscribe (pub/sub) design pattern.  Eclipse Mosquitto is an open source message broker that implements the MQTT protocol.
 
 mod_mosquitto is able to publish and/or subscribe to one or more MQTT message brokers. A FreeSWITCH `bgapi` or `originate` command may be executed if a properly formatted message is received. 
 
