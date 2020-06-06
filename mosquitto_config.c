@@ -51,18 +51,25 @@ static mosquitto_profile_t *add_profile(const char *name);
 static mosquitto_connection_t *add_connection(mosquitto_profile_t *profile, const char *name);
 static mosquitto_publisher_t *add_publisher(mosquitto_profile_t *profile, const char *name);
 static mosquitto_subscriber_t *add_subscriber(mosquitto_profile_t *profile, const char *name);
-static mosquitto_topic_t *add_publisher_topic(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher, const char *name);
+static mosquitto_topic_t *add_publisher_topic(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher,
+											  const char *name);
 static switch_status_t parse_settings(switch_xml_t cfg);
 static switch_status_t parse_profiles(switch_xml_t cfg);
 static switch_status_t parse_connections(switch_xml_t xconnection, mosquitto_profile_t *profile);
 static switch_status_t parse_publishers(switch_xml_t xpublisher, mosquitto_profile_t *profile);
 static switch_status_t parse_subscribers(switch_xml_t xsubscriber, mosquitto_profile_t *profile);
-static switch_status_t parse_publisher_topics(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher, switch_xml_t xpublisher);
-static switch_status_t parse_subscriber_topics(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber, switch_xml_t xsubscriber);
-static mosquitto_event_t *add_publisher_topic_event(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher, mosquitto_topic_t *topic, const char *name, switch_event_types_t event_type);
+static switch_status_t parse_publisher_topics(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher,
+											  switch_xml_t xpublisher);
+static switch_status_t parse_subscriber_topics(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber,
+											   switch_xml_t xsubscriber);
+static mosquitto_event_t *add_publisher_topic_event(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher,
+													mosquitto_topic_t *topic, const char *name,
+													switch_event_types_t event_type);
 static void rand_str(char *dest, size_t length);
-static switch_status_t parse_connection_tls(mosquitto_profile_t *profile, mosquitto_connection_t *connection, switch_xml_t xconnection);
-static switch_status_t parse_connection_will(mosquitto_profile_t *profile, mosquitto_connection_t *connection, switch_xml_t xconnection);
+static switch_status_t parse_connection_tls(mosquitto_profile_t *profile, mosquitto_connection_t *connection,
+											switch_xml_t xconnection);
+static switch_status_t parse_connection_will(mosquitto_profile_t *profile, mosquitto_connection_t *connection,
+											 switch_xml_t xconnection);
 
 /**
  * @brief   This function is used to add a new profile to the hash
@@ -108,11 +115,11 @@ static mosquitto_profile_t *add_profile(const char *name)
 	switch_mutex_init(&profile->subscribers_mutex, SWITCH_MUTEX_NESTED, profile->pool);
 	switch_core_hash_init(&profile->subscribers);
 
-	switch_core_hash_insert_locked(mosquitto_globals.profiles, profile->name, profile, mosquitto_globals.profiles_mutex);
+	switch_core_hash_insert_locked(mosquitto_globals.profiles, profile->name, profile,
+								   mosquitto_globals.profiles_mutex);
 	log(SWITCH_LOG_INFO, "Profile %s successfully added\n", name);
 	return profile;
 }
-
 
 /**
  * @brief   This function is used to locate a profile by name
@@ -134,7 +141,8 @@ mosquitto_profile_t *locate_profile(const char *name)
 		return profile;
 	}
 
-	if (!(profile = (mosquitto_profile_t *)switch_core_hash_find_locked(mosquitto_globals.profiles, name, mosquitto_globals.profiles_mutex))) {
+	if (!(profile = (mosquitto_profile_t *)switch_core_hash_find_locked(mosquitto_globals.profiles, name,
+																		mosquitto_globals.profiles_mutex))) {
 		// Not finding a profile is expected when starting up or when a new profile is being added
 		// The caller needs to handle the case when not finding a profile is a problem
 		// log(SWITCH_LOG_WARNING, "Unable to locate profile %s\n", name);
@@ -142,7 +150,6 @@ mosquitto_profile_t *locate_profile(const char *name)
 
 	return profile;
 }
-
 
 /**
  * @brief   This function is used to add a new connection to the hash (within a profile hash)
@@ -186,7 +193,6 @@ static mosquitto_connection_t *add_connection(mosquitto_profile_t *profile, cons
 	return connection;
 }
 
-
 /**
  * @brief   This function is used to locate a connection by name
  *
@@ -214,7 +220,8 @@ mosquitto_connection_t *locate_connection(mosquitto_profile_t *profile, const ch
 		return connection;
 	}
 
-	if (!(connection = (mosquitto_connection_t *)switch_core_hash_find_locked(profile->connections, name, profile->connections_mutex))) {
+	if (!(connection = (mosquitto_connection_t *)switch_core_hash_find_locked(profile->connections, name,
+																			  profile->connections_mutex))) {
 		// Not finding a connection is expected when starting up or when a new connection is being added
 		// The caller needs to handle the case when not finding a connection is a problem
 		// log(SWITCH_LOG_WARNING, "Unable to locate connection: %s for profile %s\n", name, profile->name);
@@ -222,7 +229,6 @@ mosquitto_connection_t *locate_connection(mosquitto_profile_t *profile, const ch
 
 	return connection;
 }
-
 
 /**
  * @brief   This function is used to remove a profile by name
@@ -254,13 +260,15 @@ switch_status_t remove_profile(const char *name)
 
 	log(SWITCH_LOG_NOTICE, "Profile %s shutting down publishers\n", profile->name);
 	switch_mutex_lock(profile->publishers_mutex);
-	for (switch_hash_index_t *publishers_hi = switch_core_hash_first(profile->publishers); publishers_hi; publishers_hi = switch_core_hash_next(&publishers_hi)) {
+	for (switch_hash_index_t *publishers_hi = switch_core_hash_first(profile->publishers); publishers_hi;
+		 publishers_hi = switch_core_hash_next(&publishers_hi)) {
 		mosquitto_publisher_t *publisher = NULL;
 		void *val;
 		switch_core_hash_this(publishers_hi, NULL, NULL, &val);
 		publisher = (mosquitto_publisher_t *)val;
 		switch_mutex_lock(publisher->topics_mutex);
-		for (switch_hash_index_t *topics_hi = switch_core_hash_first(publisher->topics); topics_hi; topics_hi = switch_core_hash_next(&topics_hi)) {
+		for (switch_hash_index_t *topics_hi = switch_core_hash_first(publisher->topics); topics_hi;
+			 topics_hi = switch_core_hash_next(&topics_hi)) {
 			mosquitto_topic_t *topic = NULL;
 			void *val;
 			switch_core_hash_this(topics_hi, NULL, NULL, &val);
@@ -277,13 +285,15 @@ switch_status_t remove_profile(const char *name)
 
 	log(SWITCH_LOG_NOTICE, "shutting down subscribers\n");
 	switch_mutex_lock(profile->subscribers_mutex);
-	for (switch_hash_index_t *subscribers_hi = switch_core_hash_first(profile->subscribers); subscribers_hi; subscribers_hi = switch_core_hash_next(&subscribers_hi)) {
+	for (switch_hash_index_t *subscribers_hi = switch_core_hash_first(profile->subscribers); subscribers_hi;
+		 subscribers_hi = switch_core_hash_next(&subscribers_hi)) {
 		mosquitto_subscriber_t *subscriber = NULL;
 		void *val;
 		switch_core_hash_this(subscribers_hi, NULL, NULL, &val);
 		subscriber = (mosquitto_subscriber_t *)val;
 		switch_mutex_lock(subscriber->topics_mutex);
-		for (switch_hash_index_t *topics_hi = switch_core_hash_first(subscriber->topics); topics_hi; topics_hi = switch_core_hash_next(&topics_hi)) {
+		for (switch_hash_index_t *topics_hi = switch_core_hash_first(subscriber->topics); topics_hi;
+			 topics_hi = switch_core_hash_next(&topics_hi)) {
 			mosquitto_topic_t *topic = NULL;
 			void *val;
 			switch_core_hash_this(topics_hi, NULL, NULL, &val);
@@ -298,7 +308,8 @@ switch_status_t remove_profile(const char *name)
 
 	log(SWITCH_LOG_NOTICE, "Profile %s shutting down connections\n", profile->name);
 	switch_mutex_lock(profile->connections_mutex);
-	for (switch_hash_index_t *connections_hi = switch_core_hash_first(profile->connections); connections_hi; connections_hi = switch_core_hash_next(&connections_hi)) {
+	for (switch_hash_index_t *connections_hi = switch_core_hash_first(profile->connections); connections_hi;
+		 connections_hi = switch_core_hash_next(&connections_hi)) {
 		mosquitto_connection_t *connection = NULL;
 		switch_bool_t force_loop_stop = SWITCH_TRUE;
 		void *val;
@@ -315,7 +326,8 @@ switch_status_t remove_profile(const char *name)
 	if (zstr(profile->log->name)) {
 		log(SWITCH_LOG_ERROR, "Unable to close log file for profile %s name is NULL\n", profile->name);
 	} else if (profile->log->logfile == NULL) {
-		log(SWITCH_LOG_ERROR, "Unable to close log file for profile %s name %s file handle is NULL\n", profile->name, profile->log->name);
+		log(SWITCH_LOG_ERROR, "Unable to close log file for profile %s name %s file handle is NULL\n", profile->name,
+			profile->log->name);
 	} else if ((status = switch_file_close(profile->log->logfile)) != SWITCH_STATUS_SUCCESS) {
 		log(SWITCH_LOG_ERROR, "Failed to close log file for profile %s name %s\n", profile->name, profile->log->name);
 	}
@@ -328,12 +340,11 @@ switch_status_t remove_profile(const char *name)
 	return status;
 }
 
-
 /**
  * @brief   This function is used to remove a connection by name
  *
- * @details This function searches the connections hash associated with a specific profile for a matching name and if found,
- *			removes it from the hash.  If any connections to brokers are active, they are first disconnected.
+ * @details This function searches the connections hash associated with a specific profile for a matching name and if
+ *found, removes it from the hash.  If any connections to brokers are active, they are first disconnected.
  *
  * @param[in]   *profile	Pointer to the profile containing the connections hash
  * @param[in]   *name		Name of the connection to be removed
@@ -370,12 +381,11 @@ switch_status_t remove_connection(mosquitto_profile_t *profile, const char *name
 	return status;
 }
 
-
 /**
  * @brief   This function is used to remove a publisher by name
  *
- * @details This function searches the publishers hash associated with a specific profile for a matching name and if found,
- *			removes it from the hash.
+ * @details This function searches the publishers hash associated with a specific profile for a matching name and if
+ *found, removes it from the hash.
  *
  * @param[in]   *profile	Pointer to the profile containing the publishers hash
  * @param[in]   *name		Name of the publisher to be removed
@@ -408,12 +418,11 @@ switch_status_t remove_publisher(mosquitto_profile_t *profile, const char *name)
 	return status;
 }
 
-
 /**
  * @brief   This function is used to remove a subscriber by name
  *
- * @details This function searches the subscribers hash associated with a specific profile for a matching name and if found,
- *			removes it from the hash.
+ * @details This function searches the subscribers hash associated with a specific profile for a matching name and if
+ *found, removes it from the hash.
  *
  * @param[in]   *profile	Pointer to the profile containing the subscribers hash
  * @param[in]   *name		Name of the subscriber to be removed
@@ -448,7 +457,6 @@ switch_status_t remove_subscriber(mosquitto_profile_t *profile, const char *name
 	return status;
 }
 
-
 /**
  * @brief   This function is used to add a publisher to a profile
  *
@@ -475,17 +483,19 @@ static mosquitto_publisher_t *add_publisher(mosquitto_profile_t *profile, const 
 	}
 
 	if ((publisher = locate_publisher(profile, name))) {
-		log(SWITCH_LOG_ERROR, "Publisher name: %s is already associated with profile %s and cannot be added\n", name, profile->name);
+		log(SWITCH_LOG_ERROR, "Publisher name: %s is already associated with profile %s and cannot be added\n", name,
+			profile->name);
 		return NULL;
 	}
 
 	if (!(publisher = (mosquitto_publisher_t *)switch_core_alloc(profile->pool, sizeof(*publisher)))) {
-		log(SWITCH_LOG_ERROR, "Failed to allocate memory from pool for profile %s publisher: %s\n", profile->name, name);
+		log(SWITCH_LOG_ERROR, "Failed to allocate memory from pool for profile %s publisher: %s\n", profile->name,
+			name);
 		return publisher;
 	}
 
 	publisher->name = switch_core_strdup(profile->pool, name);
-	publisher->profile_name =switch_core_strdup(profile->pool, profile->name);
+	publisher->profile_name = switch_core_strdup(profile->pool, profile->name);
 	switch_mutex_init(&publisher->mutex, SWITCH_MUTEX_NESTED, profile->pool);
 	switch_thread_rwlock_create(&publisher->rwlock, profile->pool);
 
@@ -497,7 +507,6 @@ static mosquitto_publisher_t *add_publisher(mosquitto_profile_t *profile, const 
 
 	return publisher;
 }
-
 
 /**
  * @brief   This function is used to locate a publisher by name
@@ -526,7 +535,8 @@ mosquitto_publisher_t *locate_publisher(mosquitto_profile_t *profile, const char
 		return publisher;
 	}
 
-	if (!(publisher = (mosquitto_publisher_t *)switch_core_hash_find_locked(profile->publishers, name, profile->publishers_mutex))) {
+	if (!(publisher = (mosquitto_publisher_t *)switch_core_hash_find_locked(profile->publishers, name,
+																			profile->publishers_mutex))) {
 		// Not finding a publisher is expected when starting up or when a new publisher is being added
 		// The caller needs to handle the case when not finding a publisher is a problem
 		// log(SWITCH_LOG_WARNING, "Unable to locate publisher: %s for provider: %s\n", name, profile->name);
@@ -534,7 +544,6 @@ mosquitto_publisher_t *locate_publisher(mosquitto_profile_t *profile, const char
 
 	return publisher;
 }
-
 
 /**
  * @brief   This function is used to add a subscriber to a profile
@@ -562,12 +571,14 @@ static mosquitto_subscriber_t *add_subscriber(mosquitto_profile_t *profile, cons
 	}
 
 	if ((subscriber = locate_subscriber(profile, name))) {
-		log(SWITCH_LOG_ERROR, "Subscriber name: %s is already associated with profile %s and cannot be added\n", name, profile->name);
+		log(SWITCH_LOG_ERROR, "Subscriber name: %s is already associated with profile %s and cannot be added\n", name,
+			profile->name);
 		return NULL;
 	}
 
 	if (!(subscriber = (mosquitto_subscriber_t *)switch_core_alloc(profile->pool, sizeof(*subscriber)))) {
-		log(SWITCH_LOG_ERROR, "Failed to allocate memory from pool for profile %s subscriber:%s\n", profile->name, name);
+		log(SWITCH_LOG_ERROR, "Failed to allocate memory from pool for profile %s subscriber:%s\n", profile->name,
+			name);
 		return subscriber;
 	}
 
@@ -584,7 +595,6 @@ static mosquitto_subscriber_t *add_subscriber(mosquitto_profile_t *profile, cons
 
 	return subscriber;
 }
-
 
 /**
  * @brief   This function is used to locate a subscriber by name
@@ -613,7 +623,8 @@ mosquitto_subscriber_t *locate_subscriber(mosquitto_profile_t *profile, const ch
 		return subscriber;
 	}
 
-	if (!(subscriber = (mosquitto_subscriber_t *)switch_core_hash_find_locked(profile->subscribers, name, profile->subscribers_mutex))) {
+	if (!(subscriber = (mosquitto_subscriber_t *)switch_core_hash_find_locked(profile->subscribers, name,
+																			  profile->subscribers_mutex))) {
 		// Not finding a subscriber is expected when starting up or when a new subscriber is being added
 		// The caller needs to handle the case when not finding a subscriber is a problem
 		// log(SWITCH_LOG_WARNING, "Profile %s unable to locate subscriber: %s\n", profile->name, name);
@@ -621,7 +632,6 @@ mosquitto_subscriber_t *locate_subscriber(mosquitto_profile_t *profile, const ch
 
 	return subscriber;
 }
-
 
 /**
  * @brief   This function is used to parse the subscribers from the configuration file
@@ -648,7 +658,7 @@ static switch_status_t parse_subscribers(switch_xml_t xprofile, mosquitto_profil
 				log(SWITCH_LOG_ERROR, "Required field name missing\n");
 				continue;
 			}
-			
+
 			subscriber = add_subscriber(profile, name);
 			subscriber->enable = SWITCH_FALSE;
 
@@ -656,21 +666,17 @@ static switch_status_t parse_subscribers(switch_xml_t xprofile, mosquitto_profil
 				char *var = NULL;
 				char *val = NULL;
 
-				var = (char *) switch_xml_attr_soft(param, "name");
-				val = (char *) switch_xml_attr_soft(param, "value");
-				if (!strncasecmp(var, "enable", 6) && !zstr(val)) {
-					subscriber->enable = switch_true(val);
-				}
+				var = (char *)switch_xml_attr_soft(param, "name");
+				val = (char *)switch_xml_attr_soft(param, "value");
+				if (!strncasecmp(var, "enable", 6) && !zstr(val)) { subscriber->enable = switch_true(val); }
 			}
 
 			parse_subscriber_topics(profile, subscriber, xsubscriber);
-
 		}
 	}
 
 	return status;
 }
-
 
 /**
  * @brief   This function is used to parse the publishers from the configuration file
@@ -697,7 +703,7 @@ static switch_status_t parse_publishers(switch_xml_t xprofile, mosquitto_profile
 				log(SWITCH_LOG_ERROR, "Required field name missing\n");
 				continue;
 			}
-			
+
 			publisher = add_publisher(profile, name);
 			publisher->enable = SWITCH_FALSE;
 
@@ -705,8 +711,8 @@ static switch_status_t parse_publishers(switch_xml_t xprofile, mosquitto_profile
 				char *var = NULL;
 				char *val = NULL;
 
-				var = (char *) switch_xml_attr_soft(param, "name");
-				val = (char *) switch_xml_attr_soft(param, "value");
+				var = (char *)switch_xml_attr_soft(param, "name");
+				val = (char *)switch_xml_attr_soft(param, "value");
 				if (!strncasecmp(var, "enable", 6) && !zstr(val)) {
 					publisher->enable = switch_true(val);
 				} else if (!strncasecmp(var, "event", 5) && !zstr(val)) {
@@ -715,13 +721,11 @@ static switch_status_t parse_publishers(switch_xml_t xprofile, mosquitto_profile
 			}
 
 			parse_publisher_topics(profile, publisher, xpublisher);
-
 		}
 	}
 
 	return status;
 }
-
 
 /**
  * @brief   This function is used to add a new topic to an existing publisher
@@ -735,7 +739,8 @@ static switch_status_t parse_publishers(switch_xml_t xprofile, mosquitto_profile
  * @retval		Address of the newly added topic or NULL
  */
 
-static mosquitto_topic_t *add_publisher_topic(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher, const char *name)
+static mosquitto_topic_t *add_publisher_topic(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher,
+											  const char *name)
 {
 	mosquitto_topic_t *topic = NULL;
 
@@ -750,17 +755,20 @@ static mosquitto_topic_t *add_publisher_topic(mosquitto_profile_t *profile, mosq
 	}
 
 	if (zstr(name)) {
-		log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic name not passed to add_publisher_topic()\n", profile->name, publisher->name);
+		log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic name not passed to add_publisher_topic()\n", profile->name,
+			publisher->name);
 		return NULL;
 	}
 
 	if ((topic = locate_publisher_topic(profile, publisher, name))) {
-		log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic: %s exists and cannot be added\n", profile->name, publisher->name, name);
+		log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic: %s exists and cannot be added\n", profile->name,
+			publisher->name, name);
 		return NULL;
 	}
 
 	if (!(topic = (mosquitto_topic_t *)switch_core_alloc(profile->pool, sizeof(*topic)))) {
-		log(SWITCH_LOG_ERROR, "Failed to allocate memory from profile %s publisher %s for topic %s\n", profile->name, publisher->name, name);
+		log(SWITCH_LOG_ERROR, "Failed to allocate memory from profile %s publisher %s for topic %s\n", profile->name,
+			publisher->name, name);
 		return topic;
 	}
 
@@ -773,11 +781,11 @@ static mosquitto_topic_t *add_publisher_topic(mosquitto_profile_t *profile, mosq
 	switch_core_hash_init(&topic->events);
 
 	switch_core_hash_insert_locked(publisher->topics, topic->name, topic, publisher->topics_mutex);
-	log(SWITCH_LOG_INFO, "Profile %s publisher %s topic %s successfully added\n", profile->name, publisher->name, topic->name);
+	log(SWITCH_LOG_INFO, "Profile %s publisher %s topic %s successfully added\n", profile->name, publisher->name,
+		topic->name);
 
 	return topic;
 }
-
 
 /**
  * @brief   This function is used to add an event to a publishers topic
@@ -792,7 +800,9 @@ static mosquitto_topic_t *add_publisher_topic(mosquitto_profile_t *profile, mosq
  * @retval		Address of the newly added event or NULL
  */
 
-static mosquitto_event_t *add_publisher_topic_event(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher, mosquitto_topic_t *topic, const char *name, switch_event_types_t event_type)
+static mosquitto_event_t *add_publisher_topic_event(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher,
+													mosquitto_topic_t *topic, const char *name,
+													switch_event_types_t event_type)
 {
 	mosquitto_event_t *event = NULL;
 	mosquitto_event_userdata_t *userdata = NULL;
@@ -808,17 +818,20 @@ static mosquitto_event_t *add_publisher_topic_event(mosquitto_profile_t *profile
 	}
 
 	if (!topic) {
-		log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic not passed to add_publisher_topic_event()\n", profile->name, publisher->name);
+		log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic not passed to add_publisher_topic_event()\n",
+			profile->name, publisher->name);
 		return NULL;
 	}
 
 	if (zstr(name)) {
-		log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic %s event name not passed to add_publisher()\n", profile->name, publisher->name, topic->name);
+		log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic %s event name not passed to add_publisher()\n",
+			profile->name, publisher->name, topic->name);
 		return NULL;
 	}
 
 	if (!(event = (mosquitto_event_t *)switch_core_alloc(profile->pool, sizeof(*event)))) {
-		log(SWITCH_LOG_ERROR, "Failed to allocate memory from profile %s publisher %s for topic %s event %s\n", profile->name, publisher->name, topic->name, name);
+		log(SWITCH_LOG_ERROR, "Failed to allocate memory from profile %s publisher %s for topic %s event %s\n",
+			profile->name, publisher->name, topic->name, name);
 		return event;
 	}
 
@@ -830,11 +843,11 @@ static mosquitto_event_t *add_publisher_topic_event(mosquitto_profile_t *profile
 	event->event_type = event_type;
 
 	switch_core_hash_insert_locked(topic->events, event->name, event, topic->events_mutex);
-	log(SWITCH_LOG_INFO, "Profile %s publisher %s topic %s event %s successfully added\n", profile->name, publisher->name, topic->name, event->name);
+	log(SWITCH_LOG_INFO, "Profile %s publisher %s topic %s event %s successfully added\n", profile->name,
+		publisher->name, topic->name, event->name);
 
 	return event;
 }
-
 
 /**
  * @brief   This function is used to locate a topic by name given a profile and publisher
@@ -850,7 +863,8 @@ static mosquitto_event_t *add_publisher_topic_event(mosquitto_profile_t *profile
  * @retval	  pointer to the hash entry of the topic or NULL
  */
 
-mosquitto_topic_t *locate_publisher_topic(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher, const char *name)
+mosquitto_topic_t *locate_publisher_topic(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher,
+										  const char *name)
 {
 	mosquitto_topic_t *topic = NULL;
 
@@ -865,19 +879,21 @@ mosquitto_topic_t *locate_publisher_topic(mosquitto_profile_t *profile, mosquitt
 	}
 
 	if (zstr(name)) {
-		log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic name not passed to locate_publisher_topic()\n", profile->name, publisher->name);
+		log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic name not passed to locate_publisher_topic()\n",
+			profile->name, publisher->name);
 		return NULL;
 	}
 
-	if (!(topic = (mosquitto_topic_t *)switch_core_hash_find_locked(publisher->topics, name, publisher->topics_mutex))) {
+	if (!(topic =
+			  (mosquitto_topic_t *)switch_core_hash_find_locked(publisher->topics, name, publisher->topics_mutex))) {
 		// Not finding a publisher topic is expected when starting up or when a new publisher topic is being added
 		// The caller needs to handle the case when not finding a publisher topic is a problem
-		// log(SWITCH_LOG_WARNING, "Profile %s publisher %s topic %s not found\n", publisher->profile_name, publisher->name, name);
+		// log(SWITCH_LOG_WARNING, "Profile %s publisher %s topic %s not found\n", publisher->profile_name,
+		// publisher->name, name);
 	}
 
 	return topic;
 }
-
 
 /**
  * @brief   This function is used to locate an event by name given a profile, publisher and topic
@@ -893,7 +909,8 @@ mosquitto_topic_t *locate_publisher_topic(mosquitto_profile_t *profile, mosquitt
  * @retval	  pointer to the hash entry of the topic or NULL
  */
 
-mosquitto_event_t *locate_publisher_topic_event(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher, mosquitto_topic_t *topic, const char *name)
+mosquitto_event_t *locate_publisher_topic_event(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher,
+												mosquitto_topic_t *topic, const char *name)
 {
 	mosquitto_event_t *event = NULL;
 
@@ -908,24 +925,27 @@ mosquitto_event_t *locate_publisher_topic_event(mosquitto_profile_t *profile, mo
 	}
 
 	if (!topic) {
-		log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic not passed to locate_publisher_topic_event()\n", profile->name, publisher->name);
+		log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic not passed to locate_publisher_topic_event()\n",
+			profile->name, publisher->name);
 		return NULL;
 	}
 
 	if (zstr(name)) {
-		log(SWITCH_LOG_WARNING, "Profile %s publisher %s topic %s event name not passed to locate_publisher_topic_event()\n", profile->name, publisher->name, topic->name);
+		log(SWITCH_LOG_WARNING,
+			"Profile %s publisher %s topic %s event name not passed to locate_publisher_topic_event()\n", profile->name,
+			publisher->name, topic->name);
 		return event;
 	}
 
 	if (!(event = (mosquitto_event_t *)switch_core_hash_find_locked(topic->events, name, topic->events_mutex))) {
 		// Not finding an event is expected when starting up or when a new event is being added
 		// The caller needs to handle the case when not finding an event is a problem
-		// log(SWITCH_LOG_INFO, "Profile %s publisher %s topic %s event %s not found\n", profile->name, publisher->name, topic->name, name);
+		// log(SWITCH_LOG_INFO, "Profile %s publisher %s topic %s event %s not found\n", profile->name, publisher->name,
+		// topic->name, name);
 	}
 
 	return event;
 }
-
 
 /**
  * @brief	This function is used to parse the connection will settings from the configuration file
@@ -939,7 +959,8 @@ mosquitto_event_t *locate_publisher_topic_event(mosquitto_profile_t *profile, mo
  * @retval		SWITCH_STATUS_SUCCESS indicates this routine completed
  */
 
-static switch_status_t parse_connection_will(mosquitto_profile_t *profile, mosquitto_connection_t *connection, switch_xml_t xconnection)
+static switch_status_t parse_connection_will(mosquitto_profile_t *profile, mosquitto_connection_t *connection,
+											 switch_xml_t xconnection)
 {
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
 	switch_xml_t param;
@@ -964,8 +985,8 @@ static switch_status_t parse_connection_will(mosquitto_profile_t *profile, mosqu
 	for (param = switch_xml_child(xconnection, "param"); param; param = param->next) {
 		char *var = NULL;
 		char *val = NULL;
-		var = (char *) switch_xml_attr_soft(param, "name");
-		val = (char *) switch_xml_attr_soft(param, "value");
+		var = (char *)switch_xml_attr_soft(param, "name");
+		val = (char *)switch_xml_attr_soft(param, "value");
 
 		if (!strncasecmp(var, "enable", 6) && !zstr(val)) {
 			connection->will.enable = switch_true(val);
@@ -983,7 +1004,6 @@ static switch_status_t parse_connection_will(mosquitto_profile_t *profile, mosqu
 	return status;
 }
 
-
 /**
  * @brief   This function is used to parse the connection tls settings from the configuration file
  *
@@ -996,7 +1016,8 @@ static switch_status_t parse_connection_will(mosquitto_profile_t *profile, mosqu
  * @retval		SWITCH_STATUS_SUCCESS indicates this routine completed
  */
 
-static switch_status_t parse_connection_tls(mosquitto_profile_t *profile, mosquitto_connection_t *connection, switch_xml_t xconnection)
+static switch_status_t parse_connection_tls(mosquitto_profile_t *profile, mosquitto_connection_t *connection,
+											switch_xml_t xconnection)
 {
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
 	switch_xml_t param;
@@ -1030,22 +1051,20 @@ static switch_status_t parse_connection_tls(mosquitto_profile_t *profile, mosqui
 	for (param = switch_xml_child(xconnection, "param"); param; param = param->next) {
 		char *var = NULL;
 		char *val = NULL;
-		var = (char *) switch_xml_attr_soft(param, "name");
-		val = (char *) switch_xml_attr_soft(param, "value");
+		var = (char *)switch_xml_attr_soft(param, "name");
+		val = (char *)switch_xml_attr_soft(param, "value");
 
 		if (!strncasecmp(var, "enable", 6) && !zstr(val)) {
 			connection->tls.enable = switch_true(val);
 		} else if (!strncasecmp(var, "support", 7)) {
-			if (!strncasecmp(val, "certificate", 11))  {
+			if (!strncasecmp(val, "certificate", 11)) {
 				connection->tls.support = switch_core_strdup(profile->pool, val);
-			} else if (!strncasecmp(var, "psk", 3))  {
+			} else if (!strncasecmp(var, "psk", 3)) {
 				connection->tls.support = switch_core_strdup(profile->pool, val);
 			}
 		} else if (!strncasecmp(var, "port", 4) && !zstr(val)) {
 			connection->tls.port = atoi(val);
-			if (connection->tls.port > 65535) {
-				connection->tls.port = 65535;
-			}
+			if (connection->tls.port > 65535) { connection->tls.port = 65535; }
 		} else if (!strncasecmp(var, "advanced_options", 16) && !zstr(val)) {
 			connection->tls.advanced_options = switch_true(val);
 		} else if (!strncasecmp(var, "cafile", 6) && !zstr(val)) {
@@ -1090,7 +1109,8 @@ static switch_status_t parse_connection_tls(mosquitto_profile_t *profile, mosqui
  * @retval		SWITCH_STATUS_SUCCESS indicates this routine completed
  */
 
-static switch_status_t parse_publisher_topics(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher, switch_xml_t xpublisher)
+static switch_status_t parse_publisher_topics(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher,
+											  switch_xml_t xpublisher)
 {
 	switch_xml_t xtopic, xtopics, param;
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
@@ -1116,7 +1136,8 @@ static switch_status_t parse_publisher_topics(mosquitto_profile_t *profile, mosq
 			}
 
 			if (locate_publisher_topic(profile, publisher, name)) {
-				log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic %s already exists\n", profile->name, publisher->name, name);
+				log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic %s already exists\n", profile->name,
+					publisher->name, name);
 				continue;
 			}
 
@@ -1130,8 +1151,8 @@ static switch_status_t parse_publisher_topics(mosquitto_profile_t *profile, mosq
 			for (param = switch_xml_child(xtopic, "param"); param; param = param->next) {
 				char *var = NULL;
 				char *val = NULL;
-				var = (char *) switch_xml_attr_soft(param, "name");
-				val = (char *) switch_xml_attr_soft(param, "value");
+				var = (char *)switch_xml_attr_soft(param, "name");
+				val = (char *)switch_xml_attr_soft(param, "value");
 				if (!strncasecmp(var, "enable", 6) && !zstr(val)) {
 					topic->enable = switch_true(val);
 				} else if (!strncasecmp(var, "connection_name", 15) && !zstr(val)) {
@@ -1147,23 +1168,28 @@ static switch_status_t parse_publisher_topics(mosquitto_profile_t *profile, mosq
 					switch_event_types_t event_type;
 
 					if (switch_name_event(val, &event_type) != SWITCH_STATUS_SUCCESS) {
-						log(SWITCH_LOG_CRIT, "Profile %s publisher %s topic %s event %s was not recognised.\n", profile->name, publisher->name, topic->name, val);
+						log(SWITCH_LOG_CRIT, "Profile %s publisher %s topic %s event %s was not recognised.\n",
+							profile->name, publisher->name, topic->name, val);
 						continue;
 					}
 
 					if (locate_publisher_topic_event(profile, publisher, topic, val)) {
-						log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic %s event %s already exists\n", profile->name, publisher->name, topic->name, val);
+						log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic %s event %s already exists\n",
+							profile->name, publisher->name, topic->name, val);
 						continue;
 					}
 
 					if (!(event = add_publisher_topic_event(profile, publisher, topic, val, event_type))) {
-						log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic %s event %si failed\n", profile->name, publisher->name, topic->name, event->name);
+						log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic %s event %si failed\n", profile->name,
+							publisher->name, topic->name, event->name);
 						continue;
 					}
-					log(SWITCH_LOG_INFO, "Profile %s publisher %s topic %s event %s\n", profile->name, publisher->name, topic->name, event->name);
+					log(SWITCH_LOG_INFO, "Profile %s publisher %s topic %s event %s\n", profile->name, publisher->name,
+						topic->name, event->name);
 
 				} else {
-					log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic %s unknown param %s\n", profile->name, publisher->name, topic->name, var);
+					log(SWITCH_LOG_ERROR, "Profile %s publisher %s topic %s unknown param %s\n", profile->name,
+						publisher->name, topic->name, var);
 				}
 			}
 		}
@@ -1171,7 +1197,6 @@ static switch_status_t parse_publisher_topics(mosquitto_profile_t *profile, mosq
 
 	return status;
 }
-
 
 /**
  * @brief   This function is used to add a new topic to an existing subscriber
@@ -1185,7 +1210,8 @@ static switch_status_t parse_publisher_topics(mosquitto_profile_t *profile, mosq
  * @retval	  Address of the newly added topic or NULL
  */
 
-static mosquitto_topic_t *add_subscriber_topic(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber, const char *name)
+static mosquitto_topic_t *add_subscriber_topic(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber,
+											   const char *name)
 {
 	mosquitto_topic_t *topic = NULL;
 
@@ -1200,13 +1226,14 @@ static mosquitto_topic_t *add_subscriber_topic(mosquitto_profile_t *profile, mos
 	}
 
 	if (zstr(name)) {
-		log(SWITCH_LOG_ERROR, "Profile %s subscriber %s topic name not passed to add_subsctiber_topic()\n", profile->name, subscriber->name);
+		log(SWITCH_LOG_ERROR, "Profile %s subscriber %s topic name not passed to add_subsctiber_topic()\n",
+			profile->name, subscriber->name);
 		return NULL;
 	}
 
-
 	if (!(topic = (mosquitto_topic_t *)switch_core_alloc(profile->pool, sizeof(*topic)))) {
-		log(SWITCH_LOG_ERROR, "Failed to allocate memory from profile %s subscriber %s for topic %s\n", profile->name, subscriber->name, name);
+		log(SWITCH_LOG_ERROR, "Failed to allocate memory from profile %s subscriber %s for topic %s\n", profile->name,
+			subscriber->name, name);
 		return topic;
 	}
 
@@ -1216,11 +1243,11 @@ static mosquitto_topic_t *add_subscriber_topic(mosquitto_profile_t *profile, mos
 	switch_thread_rwlock_create(&topic->rwlock, profile->pool);
 
 	switch_core_hash_insert_locked(subscriber->topics, topic->name, topic, subscriber->topics_mutex);
-	log(SWITCH_LOG_INFO, "Profile %s subscriber %s topic %s successfully added\n", profile->name, subscriber->name, name);
+	log(SWITCH_LOG_INFO, "Profile %s subscriber %s topic %s successfully added\n", profile->name, subscriber->name,
+		name);
 
 	return topic;
 }
-
 
 /**
  * @brief   This function is used to locate a topic by name given a profile and subscriber
@@ -1236,7 +1263,8 @@ static mosquitto_topic_t *add_subscriber_topic(mosquitto_profile_t *profile, mos
  * @retval	  pointer to the hash entry of the topic or NULL
  */
 
-mosquitto_topic_t *locate_subscriber_topic(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber, const char *name)
+mosquitto_topic_t *locate_subscriber_topic(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber,
+										   const char *name)
 {
 	mosquitto_topic_t *topic = NULL;
 
@@ -1255,15 +1283,16 @@ mosquitto_topic_t *locate_subscriber_topic(mosquitto_profile_t *profile, mosquit
 		return topic;
 	}
 
-	if (!(topic = (mosquitto_topic_t *)switch_core_hash_find_locked(subscriber->topics, name, subscriber->topics_mutex))) {
+	if (!(topic =
+			  (mosquitto_topic_t *)switch_core_hash_find_locked(subscriber->topics, name, subscriber->topics_mutex))) {
 		// Not finding an event is expected when starting up or when a new event is being added
 		// The caller needs to handle the case when not finding a event is a problem
-		// log(SWITCH_LOG_INFO, "Unable to locate profile %s subscriber %s topic %s\n", subscriber->profile_name, subscriber->name, name);
+		// log(SWITCH_LOG_INFO, "Unable to locate profile %s subscriber %s topic %s\n", subscriber->profile_name,
+		// subscriber->name, name);
 	}
 
 	return topic;
 }
-
 
 /**
  * @brief   This function is used to parse the subscriber topics from the configuration file
@@ -1277,7 +1306,8 @@ mosquitto_topic_t *locate_subscriber_topic(mosquitto_profile_t *profile, mosquit
  * @retval	  SWITCH_STATUS_SUCCESS indicates this routine completed
  */
 
-static switch_status_t parse_subscriber_topics(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber, switch_xml_t xsubscriber)
+static switch_status_t parse_subscriber_topics(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber,
+											   switch_xml_t xsubscriber)
 {
 	switch_xml_t xtopic, xtopics, param;
 	switch_status_t status = SWITCH_STATUS_SUCCESS;
@@ -1288,12 +1318,14 @@ static switch_status_t parse_subscriber_topics(mosquitto_profile_t *profile, mos
 			const char *name = switch_xml_attr(xtopic, "name");
 
 			if (zstr(name)) {
-				log(SWITCH_LOG_ERROR, "Profile %s subscriber %s Required field name missing\n", profile->name, subscriber->name);
+				log(SWITCH_LOG_ERROR, "Profile %s subscriber %s Required field name missing\n", profile->name,
+					subscriber->name);
 				continue;
 			}
 
 			if (locate_subscriber_topic(profile, subscriber, name)) {
-				log(SWITCH_LOG_ERROR, "Profile %s subscriber %s topic %s already exists\n", profile->name, subscriber->name, name);
+				log(SWITCH_LOG_ERROR, "Profile %s subscriber %s topic %s already exists\n", profile->name,
+					subscriber->name, name);
 				continue;
 			}
 
@@ -1309,8 +1341,8 @@ static switch_status_t parse_subscriber_topics(mosquitto_profile_t *profile, mos
 			for (param = switch_xml_child(xtopic, "param"); param; param = param->next) {
 				char *var = NULL;
 				char *val = NULL;
-				var = (char *) switch_xml_attr_soft(param, "name");
-				val = (char *) switch_xml_attr_soft(param, "value");
+				var = (char *)switch_xml_attr_soft(param, "name");
+				val = (char *)switch_xml_attr_soft(param, "value");
 				if (!strncasecmp(var, "enable", 6) && !zstr(val)) {
 					topic->enable = switch_true(val);
 				} else if (!strncasecmp(var, "connection_name", 15) && !zstr(val)) {
@@ -1334,7 +1366,6 @@ static switch_status_t parse_subscriber_topics(mosquitto_profile_t *profile, mos
 	return status;
 }
 
-
 /**
  * @brief   This function is used to parse the connections from the configuration file
  *
@@ -1355,8 +1386,8 @@ static switch_status_t parse_connections(switch_xml_t xprofile, mosquitto_profil
 		for (param = switch_xml_child(xconnections, "param"); param; param = param->next) {
 			char *var = NULL;
 			char *val = NULL;
-			var = (char *) switch_xml_attr_soft(param, "name");
-			val = (char *) switch_xml_attr_soft(param, "value");
+			var = (char *)switch_xml_attr_soft(param, "name");
+			val = (char *)switch_xml_attr_soft(param, "value");
 			log(SWITCH_LOG_INFO, "Connection defaults: %s %s\n", var, val);
 		}
 
@@ -1400,17 +1431,15 @@ static switch_status_t parse_connections(switch_xml_t xprofile, mosquitto_profil
 				char *var = NULL;
 				char *val = NULL;
 
-				var = (char *) switch_xml_attr_soft(param, "name");
-				val = (char *) switch_xml_attr_soft(param, "value");
+				var = (char *)switch_xml_attr_soft(param, "name");
+				val = (char *)switch_xml_attr_soft(param, "value");
 				if (!strncasecmp(var, "enable", 6) && !zstr(val)) {
 					connection->enable = switch_true(val);
 				} else if (!strncasecmp(var, "host", 4) && !zstr(val)) {
 					connection->host = switch_core_strdup(profile->pool, val);
 				} else if (!strncasecmp(var, "port", 4) && !zstr(val)) {
 					connection->port = atoi(val);
-					if (connection->port > 65535) {
-						connection->port = 65535;
-					}
+					if (connection->port > 65535) { connection->port = 65535; }
 				} else if (!strncasecmp(var, "keepalive", 9) && !zstr(val)) {
 					connection->keepalive = atoi(val);
 				} else if (!strncasecmp(var, "username", 8) && !zstr(val)) {
@@ -1466,13 +1495,11 @@ static switch_status_t parse_connections(switch_xml_t xprofile, mosquitto_profil
 					log(SWITCH_LOG_ERROR, "Connection %s unknown parameter: %s value: %s\n", name, var, val);
 				}
 			}
-
 		}
 	}
 
 	return status;
 }
-
 
 /**
  * @brief   This function is used to parse the profiles from the configuration file
@@ -1519,8 +1546,8 @@ static switch_status_t parse_profiles(switch_xml_t cfg)
 				char *var = NULL;
 				char *val = NULL;
 
-				var = (char *) switch_xml_attr_soft(param, "name");
-				val = (char *) switch_xml_attr_soft(param, "value");
+				var = (char *)switch_xml_attr_soft(param, "name");
+				val = (char *)switch_xml_attr_soft(param, "value");
 				if (!strncasecmp(var, "enable", 6) && !zstr(val)) {
 					profile->enable = switch_true(val);
 				} else if (!strncasecmp(var, "log-enable", 10) && !zstr(val)) {
@@ -1558,7 +1585,8 @@ static switch_status_t parse_profiles(switch_xml_t cfg)
 			if (zstr(profile->log->file)) {
 				profile->log->file = switch_core_sprintf(profile->pool, "%s.log", profile->name);
 			}
-			profile->log->name = switch_core_sprintf(profile->pool, "%s%s%s", profile->log->dir, SWITCH_PATH_SEPARATOR, profile->log->file);
+			profile->log->name = switch_core_sprintf(profile->pool, "%s%s%s", profile->log->dir, SWITCH_PATH_SEPARATOR,
+													 profile->log->file);
 
 			parse_connections(xprofile, profile);
 			parse_publishers(xprofile, profile);
@@ -1568,7 +1596,6 @@ static switch_status_t parse_profiles(switch_xml_t cfg)
 
 	return status;
 }
-
 
 /**
  * @brief   This function is used to parse the global settings from the configuration file
@@ -1606,8 +1633,8 @@ static switch_status_t parse_settings(switch_xml_t cfg)
 			char *var = NULL;
 			char *val = NULL;
 
-			var = (char *) switch_xml_attr_soft(param, "name");
-			val = (char *) switch_xml_attr_soft(param, "value");
+			var = (char *)switch_xml_attr_soft(param, "name");
+			val = (char *)switch_xml_attr_soft(param, "value");
 
 			if (!strncasecmp(var, "log-enable", 10) && !zstr(val)) {
 				mosquitto_globals.log.enable = switch_true(val);
@@ -1629,11 +1656,9 @@ static switch_status_t parse_settings(switch_xml_t cfg)
 				mosquitto_globals.enable_topics = switch_true(val);
 			} else if (!strncasecmp(var, "enable-events", 13) && !zstr(val)) {
 				mosquitto_globals.enable_events = switch_true(val);
-			} else if (!strncasecmp(var, "event-queue-size",16 ) && !zstr(val)) {
+			} else if (!strncasecmp(var, "event-queue-size", 16) && !zstr(val)) {
 				size_t event_queue_size = atoi(val);
-				if (event_queue_size) {
-					mosquitto_globals.event_queue_size = event_queue_size;
-				}
+				if (event_queue_size) { mosquitto_globals.event_queue_size = event_queue_size; }
 			} else if (!strncasecmp(var, "unique-string-length", 20) && !zstr(val)) {
 				size_t len = atoi(val);
 				if (!len) {
@@ -1670,11 +1695,11 @@ static switch_status_t parse_settings(switch_xml_t cfg)
 	if (zstr(mosquitto_globals.log.file)) {
 		mosquitto_globals.log.file = switch_core_sprintf(mosquitto_globals.pool, MOSQUITTO_LOG_FILE);
 	}
-	mosquitto_globals.log.name = switch_core_sprintf(mosquitto_globals.pool, "%s%s%s", mosquitto_globals.log.dir, SWITCH_PATH_SEPARATOR, mosquitto_globals.log.file);
+	mosquitto_globals.log.name = switch_core_sprintf(mosquitto_globals.pool, "%s%s%s", mosquitto_globals.log.dir,
+													 SWITCH_PATH_SEPARATOR, mosquitto_globals.log.file);
 
 	return status;
 }
-
 
 /**
  * @brief   This function is the entry routine to parse the configuration file
@@ -1707,7 +1732,6 @@ switch_status_t mosquitto_load_config(const char *cf)
 	return status;
 }
 
-
 /**
  * @brief   This function creates a string of random characters
  *
@@ -1723,16 +1747,15 @@ switch_status_t mosquitto_load_config(const char *cf)
 static void rand_str(char *dest, size_t length)
 {
 	char charset[] = "0123456789"
-		"abcdefghijklmnopqrstuvwxyz"
-		"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+					 "abcdefghijklmnopqrstuvwxyz"
+					 "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 	while (length-- > 0) {
-		size_t index = (double) rand() / RAND_MAX * (sizeof charset - 1);
+		size_t index = (double)rand() / RAND_MAX * (sizeof charset - 1);
 		*dest++ = charset[index];
 	}
 	*dest = '\0';
 }
-
 
 /* For Emacs:
  * Local Variables:

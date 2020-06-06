@@ -38,8 +38,8 @@
 #ifndef MOSQUITTO_UTILS_H
 #define MOSQUITTO_UTILS_H
 
-#include "mosquitto.h"
 #include "mod_mosquitto.h"
+#include "mosquitto.h"
 
 switch_status_t client_connect(mosquitto_profile_t *profile, mosquitto_connection_t *connection);
 switch_status_t initialize_profiles(void);
@@ -47,18 +47,23 @@ switch_status_t profile_activate(mosquitto_profile_t *profile);
 switch_status_t profile_deactivate(mosquitto_profile_t *profile);
 switch_status_t publisher_activate(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher);
 switch_status_t publisher_deactivate(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher);
-switch_status_t publisher_topic_activate(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher, mosquitto_topic_t *topic);
-switch_status_t publisher_topic_deactivate(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher, mosquitto_topic_t *topic);
+switch_status_t publisher_topic_activate(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher,
+										 mosquitto_topic_t *topic);
+switch_status_t publisher_topic_deactivate(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher,
+										   mosquitto_topic_t *topic);
 switch_status_t subscriber_activate(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber);
 switch_status_t subscriber_deactivate(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber);
-switch_status_t subscriber_topic_activate(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber, mosquitto_topic_t *topic);
-switch_status_t subscriber_topic_deactivate(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber, mosquitto_topic_t *topic);
-mosquitto_topic_t *locate_connection_topic(mosquitto_profile_t *profile, mosquitto_connection_t *connection, const char *name);
+switch_status_t subscriber_topic_activate(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber,
+										  mosquitto_topic_t *topic);
+switch_status_t subscriber_topic_deactivate(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber,
+											mosquitto_topic_t *topic);
+mosquitto_topic_t *locate_connection_topic(mosquitto_profile_t *profile, mosquitto_connection_t *connection,
+										   const char *name);
 switch_status_t connection_initialize(mosquitto_profile_t *profile, mosquitto_connection_t *connection);
 int mosquitto_log(int severity, const char *format, ...);
 int profile_log(int severity, mosquitto_profile_t *profile, const char *format, ...);
 
-#endif //MOSQUITTO_UTILS_H
+#endif // MOSQUITTO_UTILS_H
 
 /* For Emacs:
  * Local Variables:

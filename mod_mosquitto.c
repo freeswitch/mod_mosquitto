@@ -37,27 +37,28 @@
 #include <switch.h>
 
 #include "mod_mosquitto.h"
-#include "mosquitto_config.h"
 #include "mosquitto_cli.h"
-#include "mosquitto_utils.h"
+#include "mosquitto_config.h"
 #include "mosquitto_events.h"
 #include "mosquitto_mosq.h"
+#include "mosquitto_utils.h"
 
 struct globals_s mosquitto_globals;
 switch_loadable_module_interface_t *module_interface;
 
 SWITCH_MODULE_LOAD_FUNCTION(mod_mosquitto_load);
 SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_mosquitto_shutdown);
-//SWITCH_MODULE_RUNTIME_FUNCTION(mod_mosquitto_runtime);
+// SWITCH_MODULE_RUNTIME_FUNCTION(mod_mosquitto_runtime);
 
-//SWITCH_MODULE_DEFINITION(mod_mosquitto, mod_mosquitto_load, mod_mosquitto_shutdown, mod_mosquitto_runtime);
+// SWITCH_MODULE_DEFINITION(mod_mosquitto, mod_mosquitto_load, mod_mosquitto_shutdown, mod_mosquitto_runtime);
 SWITCH_MODULE_DEFINITION(mod_mosquitto, mod_mosquitto_load, mod_mosquitto_shutdown, NULL);
 
 /**
  * @brief This function is called when FreeSWITCH loads the mod_mosquitto module
  *
  * @note The definition of this function is performed by the macro SWITCH_MODULE_LOAD_FUNCTION that expands to
- *		 switch_status_t mod_mosquitto_load(switch_loadable_module_interface_t **module_interface, switch_memory_pool_t *pool)
+ *		 switch_status_t mod_mosquitto_load(switch_loadable_module_interface_t **module_interface, switch_memory_pool_t
+ **pool)
  *
  * \param[in] switch_loadable_module_interface_t **module_interface
  * \param[in] switch_memory_pool_t *pool
@@ -66,7 +67,8 @@ SWITCH_MODULE_DEFINITION(mod_mosquitto, mod_mosquitto_load, mod_mosquitto_shutdo
  *
  */
 
-SWITCH_MODULE_LOAD_FUNCTION(mod_mosquitto_load) {
+SWITCH_MODULE_LOAD_FUNCTION(mod_mosquitto_load)
+{
 
 	memset(&mosquitto_globals, 0, sizeof(mosquitto_globals));
 	mosquitto_globals.pool = pool;
@@ -109,7 +111,8 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_mosquitto_load) {
  *
  */
 
-SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_mosquitto_shutdown) {
+SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_mosquitto_shutdown)
+{
 
 	switch_mutex_lock(mosquitto_globals.mutex);
 	mosquitto_globals.running = 0;
@@ -129,7 +132,8 @@ SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_mosquitto_shutdown) {
 }
 
 /**
- * @brief This is the runtime loop of the module, from here you can listen on sockets, spawn new threads to handle requests. etc.
+ * @brief This is the runtime loop of the module, from here you can listen on sockets, spawn new threads to handle
+ * requests. etc.
  *
  * @note The definition of this function is performed by the macro SWITCH_MODULE_RUNTIME_FUNCTION that expands to
  *       switch_status_t mod_mosquitto_runtime(void)

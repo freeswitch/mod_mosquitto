@@ -35,15 +35,16 @@
  *
  */
 
-
 #ifndef MOSQUITTO_EVENTS_H
 #define MOSQUITTO_EVENTS_H
 
 void event_handler(switch_event_t *event);
-switch_status_t bind_event(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher, mosquitto_topic_t *topic, mosquitto_event_t *event);
-switch_status_t unbind_event(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher, mosquitto_topic_t *topic, mosquitto_event_t *event);
+switch_status_t bind_event(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher, mosquitto_topic_t *topic,
+						   mosquitto_event_t *event);
+switch_status_t unbind_event(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher, mosquitto_topic_t *topic,
+							 mosquitto_event_t *event);
 
-#endif //MOSQUITTO_EVENTS_H
+#endif // MOSQUITTO_EVENTS_H
 
 /* For Emacs:
  * Local Variables:

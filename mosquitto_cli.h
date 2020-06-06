@@ -35,14 +35,13 @@
  *
  */
 
-
 #ifndef MOSQUITTO_CLI_H
 #define MOSQUITTO_CLI_H
 
 void add_cli_api(switch_loadable_module_interface_t **module_interface, switch_api_interface_t *api_interface);
 void remove_cli_api();
 
-#endif //MOSQUITTO_CLI_H
+#endif // MOSQUITTO_CLI_H
 
 /* For Emacs:
  * Local Variables:

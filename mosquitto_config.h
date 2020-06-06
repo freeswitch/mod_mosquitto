@@ -35,7 +35,6 @@
  *
  */
 
-
 #ifndef MOSQUITTO_CONFIG_H
 #define MOSQUITTO_CONFIG_H
 
@@ -45,15 +44,17 @@ mosquitto_profile_t *locate_profile(const char *name);
 mosquitto_connection_t *locate_connection(mosquitto_profile_t *profile, const char *name);
 mosquitto_publisher_t *locate_publisher(mosquitto_profile_t *profile, const char *name);
 mosquitto_subscriber_t *locate_subscriber(mosquitto_profile_t *profile, const char *name);
-mosquitto_topic_t *locate_publisher_topic(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher, const char *name);
-mosquitto_topic_t *locate_subscriber_topic(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber, const char *name);
-mosquitto_event_t *locate_publisher_topic_event(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher, mosquitto_topic_t *topic, const char *name);
+mosquitto_topic_t *locate_publisher_topic(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher,
+										  const char *name);
+mosquitto_topic_t *locate_subscriber_topic(mosquitto_profile_t *profile, mosquitto_subscriber_t *subscriber,
+										   const char *name);
+mosquitto_event_t *locate_publisher_topic_event(mosquitto_profile_t *profile, mosquitto_publisher_t *publisher,
+												mosquitto_topic_t *topic, const char *name);
 switch_status_t remove_connection(mosquitto_profile_t *profile, const char *name);
 switch_status_t remove_publisher(mosquitto_profile_t *profile, const char *name);
 switch_status_t remove_subscriber(mosquitto_profile_t *profile, const char *name);
 
-#endif //MOSQUITTO_CONFIG_H
-
+#endif // MOSQUITTO_CONFIG_H
 
 /* For Emacs:
  * Local Variables:
