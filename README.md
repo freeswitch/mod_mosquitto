@@ -86,6 +86,11 @@ The following commands will build and install *only* mod_mosquitto
 make mod_mosquitto
 make mod_mosquitto-install
 ````
+To run mod_mosquitto within FreeSWITCH, perform the following two steps
+````
+Add mod_mosquito to freeswitch/conf/autoload/modules.conf.xml
+Add mosquitto.conf.xml to freeswitch/conf/autoload
+````
 
 ## Configuration
 
