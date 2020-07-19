@@ -10,16 +10,17 @@ More information can be found here:
 * [Mosquitto](https://mosquitto.org/)
 
 ## Table of Contents
-- [Table of Contents](#table-of-contents)
-	- [License](#license)
-	- [Contributor(s):](#contributors)
-	- [Features](#features)
-	- [Build and install mod_mosquitto](#build-and-install-mod_mosquitto)
-	- [Configuration](#configuration)
-	- [Usage](#usage)
-	- [Command Line Interface (CLI)](#command-line-interface-cli)
-	- [Notes](#notes)
-  - [Troubleshooting](#troubleshooting)
+
+* [Table of Contents](#table-of-contents)
+  * [License](#license)
+  * [Contributor(s):](#contributors)
+  * [Features](#features)
+  * [Build and install mod_mosquitto](#build-and-install-mod_mosquitto)
+  * [Configuration](#configuration)
+  * [Usage](#usage)
+  * [Command Line Interface (CLI)](#command-line-interface-cli)
+  * [Notes](#notes)
+  * [Troubleshooting](#troubleshooting)
 
 ## License
 
