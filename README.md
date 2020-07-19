@@ -2,7 +2,7 @@
 
 mod_mosquitto is a FreeSWITCH interface to an MQTT broker using the Eclipse Mosquitto project C client library.  MQTT is a lightweight protocol to send or receive messages using a publish/subscribe (pub/sub) design pattern.  Eclipse Mosquitto is an open source message broker that implements the MQTT protocol.
 
-mod_mosquitto is able to publish and/or subscribe to one or more MQTT message brokers. A FreeSWITCH `bgapi` or `originate` command may be executed if a properly formatted message is received. 
+mod_mosquitto is able to publish and/or subscribe to one or more MQTT message brokers. A FreeSWITCH `bgapi` or `originate` command may be executed if a properly formatted message is received.
 
 More information can be found here:
 
@@ -60,9 +60,9 @@ Subscribe to FreeSWITCH bgapi or originate requests
 *mod_mosquitto requires libmosquitto-dev to build on Debian*
 
 Change to a directory where the FreeSWITCH sources will be compiled
-````
+```console
 cd /usr/src
-````
+```
 Clone the FreeSWITCH repository into the above directory
 ````
 git clone https://github.com/signalwire/freeswitch.git
