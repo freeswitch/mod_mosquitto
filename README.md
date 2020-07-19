@@ -60,37 +60,50 @@ Subscribe to FreeSWITCH bgapi or originate requests
 *mod_mosquitto requires libmosquitto-dev to build on Debian*
 
 Change to a directory where the FreeSWITCH sources will be compiled
+
 ```console
 cd /usr/src
 ```
+
 Clone the FreeSWITCH repository into the above directory
-````
+
+```console
 git clone https://github.com/signalwire/freeswitch.git
-````
+```
+
 Perform an initial bootstrap of FreeSWITCH so that a `modules.conf` file is created
-````
+
+```console
 ./bootstrap.sh
-````
+```
+
 Add the mod_mosquitto to `modules.conf` so that an out-of-source build will be performed
-````
+
+```console
 mod_mosquitto|https://github.com/freeswitch/mod_mosquitto.git -b master
-````
+```
+
 Configure, build and install FreeSWITCH
-````
+
+```console
 ./configure
 make
 make install
-````
+```
+
 The following commands will build and install *only* mod_mosquitto
-````
+
+```console
 make mod_mosquitto
 make mod_mosquitto-install
-````
+```
+
 To run mod_mosquitto within FreeSWITCH, perform the following two steps
-````
+
+```console
 Add mod_mosquito to freeswitch/conf/autoload/modules.conf.xml
 Add mosquitto.conf.xml to freeswitch/conf/autoload
-````
+```
 
 ## Configuration
 
