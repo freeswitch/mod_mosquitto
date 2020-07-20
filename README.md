@@ -29,7 +29,7 @@ Copyright (C) 2005-2012, Anthony Minessale II <anthm@freeswitch.org>
 
 Version: MPL 1.1
 
-The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.mozilla.org/MPL/
+The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at <http://www.mozilla.org/MPL/>
 
 Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the specific language governing rights and limitations under the License.
 
@@ -38,11 +38,13 @@ The Original Code is FreeSWITCH Modular Media Switching Software Library / Soft-
 The Initial Developer of the Original Code is Anthony Minessale II <anthm@freeswitch.org>
 Portions created by the Initial Developer are Copyright (C) the Initial Developer. All Rights Reserved.
 
-## Contributor(s):
+## Contributor(s)
+
 * Norm Brandinger <n.brandinger@gmail.com>
 
 ## Features
-````
+
+```console
 Global Settings
 Multiple Profiles
 Multiple MQTT broker connections
@@ -54,11 +56,13 @@ Last Will and Testament (Will) support
 
 Publish one or more FreeSWITCH events to one or more Topics
 Subscribe to FreeSWITCH bgapi or originate requests
-````
+```
 
 ## Build and install mod_mosquitto
 
-*mod_mosquitto requires libmosquitto-dev to build on Debian*
+```console
+mod_mosquitto requires libmosquitto-dev to build on Debian
+```
 
 Change to a directory where the FreeSWITCH sources will be compiled
 
@@ -114,17 +118,18 @@ The configuration follows the standard way all other FreeSWITCH modules are conf
 
 At a high level, the configuration file is organized as follows:
 
-1.  Global settings are specified first.
-2.  One or more Profiles are then defined.
-3.  Within each Profile, there can be one or more Connections, Publishers and Pubscribers defined.
-4.  Within each Publisher or Subscriber, there can be one or more Topics defined.
-5.  Publisher Topics can have one or more event parameters.
-6.  Subscriber Topics can be authorized to execute `bgapi` or `originate` commands.
+1. Global settings are specified first.
+2. One or more Profiles are then defined.
+3. Within each Profile, there can be one or more Connections, Publishers and Pubscribers defined.
+4. Within each Publisher or Subscriber, there can be one or more Topics defined.
+5. Publisher Topics can have one or more event parameters.
+6. Subscriber Topics can be authorized to execute `bgapi` or `originate` commands.
 
 Configuration parameter details
 
 Global Settings
-````
+
+```console
 <settings>
   log-enable           - Is logging enabled (true) / disabled (false)
   log-details          - Is logging of message details enabled (true) / disabled (false)
@@ -143,10 +148,11 @@ Global Settings
   unique-string-length - Length of random characters added to
                          FreeSWITCH-Switchname-Unique / FreeSWITCH-Hostname-Unique
 </settings>
-````
+```
 
 Profile Settings
-````
+
+```console
 <profile>
   name        - Name of the profile. Each profile must have a unique name.
   enable      - Is this profile enabled (true) / disabled (false).
@@ -159,11 +165,11 @@ Profile Settings
   log-file    - Name of the log file where mod_mosquitto messages will written.
                 Defaults to the profile name + '.log'.
 </profile>
-````
+```
 
 Connection Settings
 
-````
+```console
 <connection>
   name            - Name of this connection.
                     Each connection within a profile must have unique name.
@@ -179,7 +185,7 @@ Connection Settings
   keepalive       - The MQTT keepalive value.
   username        - The username used by the MQTT broker to authorize the connection.
   password        - The password used by the MQTT broker to authenticate the connection.
-  client_id       - The client id to use. If not specified a 
+  client_id       - The client id to use. If not specified a
                     random client id will be generated.
     'FreeSWITCH-Switchname': Use the switchname as the client id.
     'FreeSWITCH-Switchname-Unique': Use the switchname with random characters
@@ -201,10 +207,10 @@ Connection Settings
 
     support  - 'certificate': The connection will be configured for
                 certificate based SSL/TLS support.
-               
+
                'pks': The connection will be configured for
                 pre-shared-key based TLS support.
-               
+
                 If not specified, the connection will NOT be configured
                 for SSL/TLS and none of the settings below will have any effect.
 
@@ -260,21 +266,21 @@ Connection Settings
               and the corresponding QoS for that topic.
   </will>
 </connection>
-````
+```
 
 Publisher Settings
 
-````
+```console
 <publisher>
   name     - Name of this publisher.
              Each publisher within a profile must have unique name.
   enable   - Is this publisher enabled (true) / disabled (false).
 </publisher>
-````
+```
 
 Topic Settings
 
-````
+```console
 <topic>
   name      - Name of this topic.
               Each topic within a profile/publisher must have unique name.
@@ -284,7 +290,7 @@ Topic Settings
   event     - The FreeSWITCH event name that will be published to this topic.
               Multiple events can be specified, one per param.
               Allowed values: https://docs.freeswitch.org/switch__types_8h.html#ac9614049b0344bb672df9d23a7ec4a09
-              
+
   pattern   - Pattern used to classify and filter different MQTT messages.
               For example: FreeSWITCH/command or FreeSWITCH/heartbeat.
   qos       - Message delivery Quality of Service
@@ -297,21 +303,21 @@ Topic Settings
   retain    - (true/false) The MQTT broker stores the last retained message
                and the corresponding QoS for that topic.
 </topic>
-````
+```
 
 Subscriber Settings
 
-````
+```console
 <subscriber>
   name     - Name of this subscriber.
              Each subscriber within a profile must have unique name.
   enable   - Is this subscriber enabled (true) / disabled (false).
 </subscriber>
-````
+```
 
 Topic Settings
 
-````
+```console
 <topic>
   name    - Name of this topic.
             Each topic within a profile/subscriber must have unique name.
@@ -330,13 +336,13 @@ Topic Settings
   originate_authorized - Are originate commands authorized (true) / not authorized (false)
   bgapi_authorized     - Are bgapi commands authorized (true) / not authorized (false)
 </topic>
-````
+```
 
 Below is an example of an empty configuration file showing the structure:
 
 Note: Multiple profiles, connections, publishers, subscribers and topics are allowed.
 
-````
+```console
 <configuration>
   <settings>
   </settings>
@@ -369,10 +375,11 @@ Note: Multiple profiles, connections, publishers, subscribers and topics are all
     </profile>
   </profiles>
 </configuration>
-````
+```
 
 An example configuration file:
-````
+
+```console
 <configuration name="mosquitto.conf" description="mod_mosquitto">
   <settings>
     <param name="log-enable" value="true"/>
@@ -496,52 +503,60 @@ An example configuration file:
     </profile>
   </profiles>
 </configuration>
-````
+```
 
 ## Usage
 
 BGAPI
 
-1.  Set up mod_mosquitto to publish the `BACKGROUND_JOB` event to a topic, for example: `FreeSWITCH/BACKGROUND_JOB`.
-2.  With your MQTT client subscribe to the above topic.
-3.  Set up mod_mosquitto to subscribe to a topic with the `bgapi_authorized` permissions set, for example: `FreeSWITCH/command`.
-4.  With your MQTT client, publish to a topic mod_mosquitto is subscribed to, for example: `FreeSWITCH/command`.
-  The content of the published message should start with `bgapi`, for example:
-  ````
-    bgapi version
-    bgapi show registrations
-  ````
-5.  The responses will be published to the above topic, for example `FreeSWITCH/BACKGROUND_JOB`.
+1. Set up mod_mosquitto to publish the `BACKGROUND_JOB` event to a topic, for example: `FreeSWITCH/BACKGROUND_JOB`.
+2. With your MQTT client subscribe to the above topic.
+3. Set up mod_mosquitto to subscribe to a topic with the `bgapi_authorized` permissions set, for example: `FreeSWITCH/command`.
+4. With your MQTT client, publish to a topic mod_mosquitto is subscribed to, for example: `FreeSWITCH/command`.
+
+   The content of the published message should start with `bgapi`, for example:
+
+   ```console
+      bgapi version
+      bgapi show registrations
+   ```
+
+5. The responses will be published to the above topic, for example `FreeSWITCH/BACKGROUND_JOB`.
 
 ORIGINATE
 
-1.  With your MQTT client, publish to a topic mod_mosquitto is subscribed to, for example: `FreeSWITCH/command`.
-2.  Set up mod_mosquitto to subscribe to a topic with the `originate_authorized` permissions set, for example: `FreeSWITCH/command`.
-3.  With your MQTT client, publish to a topic mod_mosquitto is subscribed to, for example: `FreeSWITCH/command`.
-  The content of the published message should start with `originate`, for example:
-  ````
+1. With your MQTT client, publish to a topic mod_mosquitto is subscribed to, for example: `FreeSWITCH/command`.
+2. Set up mod_mosquitto to subscribe to a topic with the `originate_authorized` permissions set, for example: `FreeSWITCH/command`.
+3. With your MQTT client, publish to a topic mod_mosquitto is subscribed to, for example: `FreeSWITCH/command`.
+  
+   The content of the published message should start with `originate`, for example:
+  
+   ```console
     originate {origination_caller_id_number=19005551212}sofia/internal/sip:1000@192.168.1.1:58289 9386 XML default
     originate {origination_caller_id_number=9005551212}sofia/default/whatever@wherever 19005551212 XML default
-  ````
-4.  Note: Depending on the FreeSWITCH events being published, the result of the `originate` command may, or may not be sent to the MQTT client.
+   ```
+
+4. Note: Depending on the FreeSWITCH events being published, the result of the `originate` command may, or may not be sent to the MQTT client.
 
 SUBSCRIBE to a topic
 
 Example of the the topic configuration to subscribe to a topic (and allowing both `bgapi` and `originate` commands):
 
-Notes:
-  1.  The topic `name` must be unique within a profile.
-  2.  The topic can be enabled  or disabled by setting the `enable` param.
-  3.  The connection `name` must reference a connection previously defined in the configuration file.
-  4.  The `pattern` must comply with MQTT standards.
-  5.  The `qos` value must comply with MQTT standards. Value 0, 1 or 2 indicating the Quality of Service to be used.
-  6.  The `originate_authorized` / `bgapi_authorized` permission flags.
-    WARNING: Allowing either of these settings WILL allow phone calls to be initiated by the MQTT broker to FreeSWITCH.
-    WARNING: If the connected MQTT broker is not locked down, toll fraud WILL HAPPEN by bad actors.
-    WARNING: REPEATED: If the connected MQTT broker is not locked down, toll fraud WILL HAPPEN by bad actors.
-    WARNING: REPEATED A THIRD TIME: If the connected MQTT broker is not locked down, toll fraud WILL HAPPEN by bad actors.
+Notes
 
-````
+  1. The topic `name` must be unique within a profile.
+  2. The topic can be enabled  or disabled by setting the `enable` param.
+  3. The connection `name` must reference a connection previously defined in the configuration file.
+  4. The `pattern` must comply with MQTT standards.
+  5. The `qos` value must comply with MQTT standards. Value 0, 1 or 2 indicating the Quality of Service to be used.
+  6. The `originate_authorized` / `bgapi_authorized` permission flags.
+
+     WARNING: Allowing either of these settings WILL allow phone calls to be initiated by the MQTT broker to FreeSWITCH.
+     WARNING: If the connected MQTT broker is not locked down, toll fraud WILL HAPPEN by bad actors.
+     WARNING: REPEATED: If the connected MQTT broker is not locked down, toll fraud WILL HAPPEN by bad actors.
+     WARNING: REPEATED A THIRD TIME: If the connected MQTT broker is not locked down, toll fraud WILL HAPPEN by bad actors.
+
+```console
 <subscriber>
   <topics>
     <topic name="command">
@@ -555,29 +570,30 @@ Notes:
     </topic>
   </topics>
 </subscriber>
-````
+```
 
 PUBLISH an event to a topic:
 
-Notes:
-  1.  The topic `name` must be unique within a profile.
-  2.  The topic can be enabled or disabled by setting the `enable` param.
-  3.  The connection `name` must reference a connection previously defined in the configuration file.
-  4.  The pattern must comply with MQTT standards.
-  5.  The `qos` value must comply with MQTT standards. Value 0, 1 or 2 indicating the Quality of Service to be used.
-  6.  The `retain` boolean must be either `true` or `false`.
-  7.  The `event` parameter must contain a single FreeSWITCH supported event.
-      Multiple `event` parameters be be added to a topic.
+Notes
+
+  1. The topic `name` must be unique within a profile.
+  2. The topic can be enabled or disabled by setting the `enable` param.
+  3. The connection `name` must reference a connection previously defined in the configuration file.
+  4. The pattern must comply with MQTT standards.
+  5. The `qos` value must comply with MQTT standards. Value 0, 1 or 2 indicating the Quality of Service to be used.
+  6. The `retain` boolean must be either `true` or `false`.
+  7. The `event` parameter must contain a single FreeSWITCH supported event.
+     Multiple `event` parameters be be added to a topic.
 
 The example below configures mod_mosquitto to publish the single event type, `HEARTBEAT` to a topic named `Heartbeat`.
 In addition, mod_mosquitto will publish two event types, `HEARTBEAT` and `RE_SCHEDULE` to a topic named `Multiple`.
 
-The list of valid FreeSWITCH event types can be found here:  https://docs.freeswitch.org/switch__types_8h.html#ac9614049b0344bb672df9d23a7ec4a09
+The list of valid FreeSWITCH event types can be found here:  <https://docs.freeswitch.org/switch__types_8h.html#ac9614049b0344bb672df9d23a7ec4a09>
 
 If the above link doesn't work, search the FreeSWITCH documentaton for `switch_event_types_t`.
 The event names used here are the same as those defined in `switch_event_types_t` with the removal of the `SWITCH_EVENT` prefix.
 
-````
+```console
 <publisher>
   <topics>
     <topic name="Heartbeat">
@@ -599,13 +615,13 @@ The event names used here are the same as those defined in `switch_event_types_t
     </topic>
   </topics>
 </publisher>
-````
+```
 
 ## Command Line Interface (CLI)
 
 The following mod_mosquitto commands can be entered in the FreeSWITCH console (fs_api):
 
-````
+```console
 mosquitto [help]
 mosquitto status
 mosquitto loglevel [debug|info|notice|warning|error|critical|alert|console]
@@ -615,7 +631,7 @@ mosquitto remove profile <profile-name> [connection|publisher|subscriber] <name>
 mosquitto connect profile <profile-name> connection <name>
 mosquitto disconnect profile <profile-name> connection <name>
 mosquitto bgapi <command> [<arg>]
-````
+```
 
 ## Notes
 
@@ -625,20 +641,22 @@ The list of available `bgapi` commands are available by entering `show api` in t
 
 Possible TODO items:
 
-````
+```console
 MQTT V5 support
 Throttle (circuit-breaker) support
 Enhanced security around command execution
 Enhanced CLI functionality
 Enhanced logging / statistics
-````
+```
 
 ## Troubleshooting
 
 Compile problems may result if Debian Stretch is not being used.  If this is the case, please add the Stretch version of mosquitto to APT as follows:
 
 In `/etc/apt/sources.list.d` create a file called `mosquitto.list` and add this line to it
-````
+
+```console
 deb http://repo.mosquitto.org/debian stretch main
-````
+```
+
 Then perform an `apt update` and try to compile mod_mosquitto again.
