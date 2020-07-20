@@ -551,10 +551,12 @@ Notes
   5. The `qos` value must comply with MQTT standards. Value 0, 1 or 2 indicating the Quality of Service to be used.
   6. The `originate_authorized` / `bgapi_authorized` permission flags.
 
-     WARNING: Allowing either of these settings WILL allow phone calls to be initiated by the MQTT broker to FreeSWITCH.
+```console
+     WARNING: Allowing either originate_authorized or bgapi_authorized settings WILL allow phone calls to be initiated by the MQTT broker to FreeSWITCH.
      WARNING: If the connected MQTT broker is not locked down, toll fraud WILL HAPPEN by bad actors.
      WARNING: REPEATED: If the connected MQTT broker is not locked down, toll fraud WILL HAPPEN by bad actors.
      WARNING: REPEATED A THIRD TIME: If the connected MQTT broker is not locked down, toll fraud WILL HAPPEN by bad actors.
+```
 
 ```console
 <subscriber>
