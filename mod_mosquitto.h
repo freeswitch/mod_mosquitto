@@ -245,7 +245,7 @@ struct mosquitto_log_s {
 	char *name;
 };
 
-struct globals_s {
+typedef struct globals_s {
 	switch_memory_pool_t *pool;
 	switch_mutex_t *mutex;
 	switch_thread_rwlock_t *bgapi_rwlock;
@@ -269,8 +269,8 @@ struct globals_s {
 	switch_bool_t enable_events;
 	size_t unique_string_length;
 	switch_api_interface_t api_interface;
-};
-extern struct globals_s mosquitto_globals;
+} globals_t;
+extern globals_t mosquitto_globals;
 
 #endif /* MOD_MOSQUITTO_H */
 

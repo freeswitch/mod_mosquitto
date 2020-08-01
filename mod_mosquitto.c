@@ -43,7 +43,7 @@
 #include "mosquitto_mosq.h"
 #include "mosquitto_utils.h"
 
-struct globals_s mosquitto_globals;
+globals_t mosquitto_globals;
 switch_loadable_module_interface_t *module_interface;
 
 SWITCH_MODULE_LOAD_FUNCTION(mod_mosquitto_load);

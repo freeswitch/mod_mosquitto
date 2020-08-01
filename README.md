@@ -552,10 +552,10 @@ Notes
   6. The `originate_authorized` / `bgapi_authorized` permission flags.
 
 ```console
-     WARNING: Allowing either originate_authorized or bgapi_authorized settings WILL allow phone calls to be initiated by the MQTT broker to FreeSWITCH.
-     WARNING: If the connected MQTT broker is not locked down, toll fraud WILL HAPPEN by bad actors.
-     WARNING: REPEATED: If the connected MQTT broker is not locked down, toll fraud WILL HAPPEN by bad actors.
-     WARNING: REPEATED A THIRD TIME: If the connected MQTT broker is not locked down, toll fraud WILL HAPPEN by bad actors.
+WARNING: Allowing either originate_authorized or bgapi_authorized settings WILL allow phone calls to be initiated by the MQTT broker to FreeSWITCH.
+WARNING: If the connected MQTT broker is not locked down, toll fraud WILL HAPPEN by bad actors.
+WARNING: REPEATED: If the connected MQTT broker is not locked down, toll fraud WILL HAPPEN by bad actors.
+WARNING: REPEATED A THIRD TIME: If the connected MQTT broker is not locked down, toll fraud WILL HAPPEN by bad actors.
 ```
 
 ```console
