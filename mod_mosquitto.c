@@ -123,8 +123,7 @@ SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_mosquitto_shutdown)
 	remove_cli_api();
 
 	mosq_shutdown();
-
-	switch_core_hash_destroy(&mosquitto_globals.profiles);
+	
 	switch_mutex_destroy(mosquitto_globals.profiles_mutex);
 	switch_mutex_unlock(mosquitto_globals.mutex);
 	switch_mutex_destroy(mosquitto_globals.mutex);
