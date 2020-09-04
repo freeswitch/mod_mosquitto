@@ -8,6 +8,12 @@ mod_mosquitto_la_SOURCES  = mosquitto_mosq.c mosquitto_events.c mosquitto_utils.
 mod_mosquitto_la_CFLAGS   = $(FREESWITCH_CFLAGS) $(OPENSSL_CFLAGS) $(MOSQUITTO_CFLAGS)
 mod_mosquitto_la_LDFLAGS  = -avoid-version -module -no-undefined -shared $(FREESWITCH_LIBS) $(OPENSSL_LIBS) $(MOSQUITTO_LIBS)
 
+noinst_PROGRAMS = test/test_mod_mosquitto
+test_test_mod_mosquitto_CFLAGS = $(FREESWITCH_CFLAGS) -DSWITCH_TEST_BASE_DIR_FOR_CONF=\"${abs_builddir}/test\" -DSWITCH_TEST_BASE_DIR_OVERRIDE=\"${abs_builddir}/test\"
+test_test_mod_mosquitto_LDFLAGS = -avoid-version -no-undefined $(FREESWITCH_LIBS)
+
+TESTS = $(noinst_PROGRAMS)
+
 else
 install: error
 all: error
