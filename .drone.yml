@@ -1,0 +1,30 @@
+---
+kind: pipeline
+name: unit-tests
+
+steps:
+    - name: bootstrap
+      image: signalwire/freeswitch-public-base
+      pull: true
+      commands:
+      - ./bootstrap.sh
+
+    - name: configure make and check
+      image: signalwire/freeswitch-public-base
+      pull: true
+      commands:
+      - echo "deb http://ftp.de.debian.org/debian testing main" > /etc/apt/sources.list
+      - apt-get update
+      - apt-get -y -t testing install libmosquitto-dev
+      - apt-get -y install libfreeswitch-dev freeswitch-mod-console
+      - ./bootstrap.sh
+      - ./configure
+      - make && make install
+      - make check
+
+trigger:
+  branch:
+  - master
+  event:
+  - pull_request
+  - push
