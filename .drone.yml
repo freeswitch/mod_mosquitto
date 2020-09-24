@@ -13,14 +13,45 @@ steps:
       image: signalwire/freeswitch-public-base
       pull: true
       commands:
+      - export WORK_DIR=$PWD
+      - echo $WORK_DIR
       - echo "deb http://ftp.de.debian.org/debian testing main" > /etc/apt/sources.list
       - apt-get update
       - apt-get -y -t testing install libmosquitto-dev
       - apt-get -y install libfreeswitch-dev freeswitch-mod-console
       - ./bootstrap.sh
       - ./configure
-      - make && make install
-      - make check
+      - echo '#!/bin/bash\nmake -j`nproc --all` |& tee $WORK_DIR/unit-tests-build-result.txt\nexitstatus=$${PIPESTATUS[0]}\necho $$exitstatus > $WORK_DIR/build-status.txt\n' > build.sh
+      - chmod +x build.sh
+      - ./build.sh
+      - (make install || true)
+      - mkdir -p $WORK_DIR/tests/unit
+      - cat /proc/sys/kernel/core_pattern
+      - ./run-tests-parallel.sh 
+      - echo 0 > $WORK_DIR/tests/unit/run-tests-status.txt
+      - ./collect-test-logs.sh && exit 0 || echo 'Some tests failed'
+      - ls -la ./test
+      - echo 1 > $WORK_DIR/tests/unit/run-tests-status.txt
+      - ls -la /cores
+      - mkdir -p $WORK_DIR/tests/unit/logs
+      - (mv test/artifacts.html $WORK_DIR/tests/unit/logs/ || true)
+      - (mv test/log_run-tests_*.html $WORK_DIR/tests/unit/logs/ || true)
+      - (mv test/backtrace_*.txt $WORK_DIR/tests/unit/logs/ || true)
+      - ls -la $WORK_DIR/tests/unit/logs
+
+    - name: notify
+      image: signalwire/public-freeswitch-unit-tests-notify
+      pull: true
+      environment:
+        GITHUB_CI_APP_PEM:
+          from_secret: github_ci_app_pem
+        SSH_KEY:
+          from_secret: public_artifacts_ssh_key
+        SLACK_WEBHOOK_URL:
+          from_secret: slack_webhook_url
+      commands:
+      - /root/notify.sh
+
 
 trigger:
   branch:
@@ -28,3 +59,8 @@ trigger:
   event:
   - pull_request
   - push
+---
+kind: signature
+hmac: e1b52cf28bcc1e7ce675937c7f96389176fac1f4f72819df329c913651bcc825
+
+...
