@@ -62,10 +62,9 @@ void *SWITCH_THREAD_FUNC bgapi_exec(switch_thread_t *thread, void *obj)
 {
 	mosquitto_bgapi_job_t *job = NULL;
 	switch_stream_handle_t stream = {0};
-	switch_status_t status;
 	char *reply, *freply = NULL;
 	switch_event_t *event;
-	char *arg;
+	char *arg = NULL;
 	switch_memory_pool_t *pool;
 
 	job = (mosquitto_bgapi_job_t *)obj;
@@ -80,7 +79,7 @@ void *SWITCH_THREAD_FUNC bgapi_exec(switch_thread_t *thread, void *obj)
 
 	if ((arg = strchr(job->cmd, ' '))) { *arg++ = '\0'; }
 
-	if ((status = switch_api_execute(job->cmd, arg, NULL, &stream)) == SWITCH_STATUS_SUCCESS) {
+	if ((switch_api_execute(job->cmd, arg, NULL, &stream)) == SWITCH_STATUS_SUCCESS) {
 		reply = (char *)stream.data;
 	} else {
 		freply = switch_mprintf("%s: Command not found!\n", job->cmd);
