@@ -52,6 +52,51 @@ steps:
       commands:
       - /root/notify.sh
 
+trigger:
+  branch:
+  - master
+  event:
+  - pull_request
+  - push
+
+---
+kind: pipeline
+name: scan-build
+
+steps:
+    - name: scan-build
+      image: signalwire/freeswitch-public-base
+      pull: true
+      commands:
+      - apt-get update
+      - DEBIAN_FRONTEND=noninteractive apt-get -yq install clang-tools-7
+      - echo "deb http://ftp.de.debian.org/debian testing main" > /etc/apt/sources.list
+      - apt-get update
+      - apt-get -y -t testing install libmosquitto-dev
+      - apt-get -y install libfreeswitch-dev freeswitch-mod-console
+      - export WORK_DIR=$PWD
+      - echo $WORK_DIR
+      - ./bootstrap.sh
+      - ./configure
+      - mkdir -p ./scan-build
+      - echo '#!/bin/bash\nscan-build-7 -o ./scan-build/ make -j`nproc --all` |& tee ./scan-build-result.txt\nexitstatus=$${PIPESTATUS[0]}\necho $$exitstatus > ./scan-build-status.txt\n' > scan.sh
+      - chmod +x scan.sh
+      - ./scan.sh
+      - exitstatus=`cat ./scan-build-status.txt`
+      - echo "*** Exit status is $exitstatus"
+
+    - name: notify
+      image: signalwire/public-freeswitch-scan-build-notify
+      pull: true
+      environment:
+        GITHUB_CI_APP_PEM:
+          from_secret: github_ci_app_pem
+        SSH_KEY:
+          from_secret: public_artifacts_ssh_key
+        SLACK_WEBHOOK_URL:
+          from_secret: slack_webhook_url
+      commands:
+      - /root/notify.sh
 
 trigger:
   branch:
@@ -61,6 +106,6 @@ trigger:
   - push
 ---
 kind: signature
-hmac: e1b52cf28bcc1e7ce675937c7f96389176fac1f4f72819df329c913651bcc825
+hmac: de97a97aadee1132909a41547ca7856c35511c4c76cafdfa2f21939a7c2aa959
 
 ...
