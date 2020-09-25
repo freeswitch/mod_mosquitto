@@ -20,7 +20,8 @@ steps:
       - apt-get -y -t testing install libmosquitto-dev
       - apt-get -y install libfreeswitch-dev freeswitch-mod-console
       - ./bootstrap.sh
-      - ./configure
+      - export ASAN_OPTIONS=log_path=stdout:disable_coredump=0:unmap_shadow_on_exit=1;
+      - ./configure --enable-address-sanitizer
       - echo '#!/bin/bash\nmake -j`nproc --all` |& tee $WORK_DIR/unit-tests-build-result.txt\nexitstatus=$${PIPESTATUS[0]}\necho $$exitstatus > $WORK_DIR/build-status.txt\n' > build.sh
       - chmod +x build.sh
       - ./build.sh
@@ -55,6 +56,7 @@ steps:
 trigger:
   branch:
   - master
+  - asan
   event:
   - pull_request
   - push
@@ -106,6 +108,6 @@ trigger:
   - push
 ---
 kind: signature
-hmac: de97a97aadee1132909a41547ca7856c35511c4c76cafdfa2f21939a7c2aa959
+hmac: acbb80eed377a0414bac32a60d7b7e141863a69ba0ada500ded730982794dccc
 
 ...
