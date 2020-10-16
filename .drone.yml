@@ -40,17 +40,15 @@ steps:
       - ls -la $WORK_DIR/tests/unit/logs
 
     - name: notify
-      image: signalwire/public-freeswitch-unit-tests-notify
+      image: signalwire/drone-notify
       pull: true
       environment:
-        GITHUB_CI_APP_PEM:
-          from_secret: github_ci_app_pem
-        SSH_KEY:
-          from_secret: public_artifacts_ssh_key
         SLACK_WEBHOOK_URL:
           from_secret: slack_webhook_url
+        ENV_FILE:
+          from_secret: notify_env
       commands:
-      - /root/notify.sh
+      - /root/unit-tests-notify.sh
 
 trigger:
   branch:
@@ -86,17 +84,15 @@ steps:
       - echo "*** Exit status is $exitstatus"
 
     - name: notify
-      image: signalwire/public-freeswitch-scan-build-notify
+      image: signalwire/drone-notify
       pull: true
       environment:
-        GITHUB_CI_APP_PEM:
-          from_secret: github_ci_app_pem
-        SSH_KEY:
-          from_secret: public_artifacts_ssh_key
         SLACK_WEBHOOK_URL:
           from_secret: slack_webhook_url
+        ENV_FILE:
+          from_secret: notify_env
       commands:
-      - /root/notify.sh
+      - /root/scan-build-notify.sh
 
 trigger:
   branch:
@@ -106,6 +102,6 @@ trigger:
   - push
 ---
 kind: signature
-hmac: de97a97aadee1132909a41547ca7856c35511c4c76cafdfa2f21939a7c2aa959
+hmac: ecfe3205d9ab8cafff8176b8ca20c096783dd81463042749360a26295a950467
 
 ...
