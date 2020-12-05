@@ -261,7 +261,7 @@ switch_status_t remove_profile(const char *name)
 	log(SWITCH_LOG_NOTICE, "Profile %s shutting down publishers\n", profile->name);
 	switch_mutex_lock(profile->publishers_mutex);
 	for (switch_hash_index_t *publishers_hi = switch_core_hash_first(profile->publishers); publishers_hi;
-		 publishers_hi = switch_core_hash_next(&publishers_hi)) {
+		publishers_hi = switch_core_hash_next(&publishers_hi)) {
 		mosquitto_publisher_t *publisher = NULL;
 		void *val;
 		switch_core_hash_this(publishers_hi, NULL, NULL, &val);
@@ -274,19 +274,34 @@ switch_status_t remove_profile(const char *name)
 			switch_core_hash_this(topics_hi, NULL, NULL, &val);
 			topic = (mosquitto_topic_t *)val;
 			log(SWITCH_LOG_NOTICE, "shutting down publisher:%s  topic: %s\n", publisher->name, topic->name);
-			publisher_topic_deactivate(profile, publisher, topic);
+			switch_mutex_lock(topic->events_mutex);
+            for (switch_hash_index_t *events_hi = switch_core_hash_first(topic->events); events_hi;
+                events_hi = switch_core_hash_next(&events_hi)) {
+                mosquitto_event_t *event = NULL;
+                void *val;
+                switch_core_hash_this(events_hi, NULL, NULL, &val);
+                event = (mosquitto_event_t *)val;
+                switch_safe_free(event->userdata);
+                log(SWITCH_LOG_NOTICE, "Profile %s publisher %s topic %s event %s unbind %d\n", profile->name,
+                    publisher->name, topic->name, event->name, status);
+            }
+            switch_core_hash_destroy(&topic->events);
+            switch_mutex_unlock(topic->events_mutex);
+
 			switch_core_hash_delete(publisher->topics, topic->name);
 		}
+		switch_core_hash_destroy(&publisher->topics);
 		switch_mutex_unlock(publisher->topics_mutex);
 		log(SWITCH_LOG_NOTICE, "deleting publisher name:%s from profile hash\n", publisher->name);
 		switch_core_hash_delete(profile->publishers, publisher->name);
 	}
+	switch_core_hash_destroy(&profile->publishers);
 	switch_mutex_unlock(profile->publishers_mutex);
 
 	log(SWITCH_LOG_NOTICE, "shutting down subscribers\n");
 	switch_mutex_lock(profile->subscribers_mutex);
 	for (switch_hash_index_t *subscribers_hi = switch_core_hash_first(profile->subscribers); subscribers_hi;
-		 subscribers_hi = switch_core_hash_next(&subscribers_hi)) {
+		subscribers_hi = switch_core_hash_next(&subscribers_hi)) {
 		mosquitto_subscriber_t *subscriber = NULL;
 		void *val;
 		switch_core_hash_this(subscribers_hi, NULL, NULL, &val);
@@ -302,14 +317,18 @@ switch_status_t remove_profile(const char *name)
 			subscriber_topic_deactivate(profile, subscriber, topic);
 			switch_core_hash_delete(subscriber->topics, topic->name);
 		}
+        switch_core_hash_destroy(&subscriber->topics);
+        switch_mutex_unlock(subscriber->topics_mutex);
+        log(SWITCH_LOG_NOTICE, "deleting subscriber name:%s from profile hash\n", subscriber->name);
 		switch_core_hash_delete(profile->subscribers, subscriber->name);
 	}
+	switch_core_hash_destroy(&profile->subscribers);
 	switch_mutex_unlock(profile->subscribers_mutex);
 
 	log(SWITCH_LOG_NOTICE, "Profile %s shutting down connections\n", profile->name);
 	switch_mutex_lock(profile->connections_mutex);
 	for (switch_hash_index_t *connections_hi = switch_core_hash_first(profile->connections); connections_hi;
-		 connections_hi = switch_core_hash_next(&connections_hi)) {
+		connections_hi = switch_core_hash_next(&connections_hi)) {
 		mosquitto_connection_t *connection = NULL;
 		switch_bool_t force_loop_stop = SWITCH_TRUE;
 		void *val;
@@ -320,6 +339,7 @@ switch_status_t remove_profile(const char *name)
 		mosq_destroy(connection);
 		switch_core_hash_delete(profile->connections, connection->name);
 	}
+	switch_core_hash_destroy(&profile->connections);
 	switch_mutex_unlock(profile->connections_mutex);
 
 	switch_mutex_lock(profile->log->mutex);

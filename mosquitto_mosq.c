@@ -1623,7 +1623,7 @@ switch_status_t mosq_shutdown(void)
 
 	switch_mutex_lock(mosquitto_globals.profiles_mutex);
 	for (switch_hash_index_t *profiles_hi = switch_core_hash_first(mosquitto_globals.profiles); profiles_hi;
-		 profiles_hi = switch_core_hash_next(&profiles_hi)) {
+		profiles_hi = switch_core_hash_next(&profiles_hi)) {
 		mosquitto_profile_t *profile = NULL;
 		void *val;
 		switch_core_hash_this(profiles_hi, NULL, NULL, &val);

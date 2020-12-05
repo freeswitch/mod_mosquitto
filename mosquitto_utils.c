@@ -347,7 +347,7 @@ switch_status_t publisher_topic_deactivate(mosquitto_profile_t *profile, mosquit
 	if (topic->enable) {
 		switch_mutex_lock(topic->events_mutex);
 		for (switch_hash_index_t *events_hi = switch_core_hash_first(topic->events); events_hi;
-			 events_hi = switch_core_hash_next(&events_hi)) {
+			events_hi = switch_core_hash_next(&events_hi)) {
 			mosquitto_event_t *event = NULL;
 			void *val;
 			switch_core_hash_this(events_hi, NULL, NULL, &val);
