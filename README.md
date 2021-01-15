@@ -278,7 +278,7 @@ Publisher Settings
 </publisher>
 ```
 
-Topic Settings
+Publisher Topic Settings
 
 ```console
 <topic>
@@ -315,7 +315,7 @@ Subscriber Settings
 </subscriber>
 ```
 
-Topic Settings
+Subscriber Topic Settings
 
 ```console
 <topic>
