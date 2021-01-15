@@ -465,8 +465,8 @@ An example configuration file:
             <topic name="Multiple">
               <param name="enable" value="false"/>
               <param name="connection_name" value="broker2"/>
-              <param name="event" value="HEARTBEAT"/>
-              <param name="event" value="RE_SCHEDULE"/>
+              <param name="event" value="CHANNEL_ANSWER"/>
+              <param name="event" value="CHANNEL_HANGUP"/>
               <param name="pattern" value="FreeSWITCH/MULTIPLE"/>
               <param name="qos" value="0"/>
               <param name="retain" value="false"/>
@@ -534,6 +534,8 @@ ORIGINATE
    ```console
     originate {origination_caller_id_number=19005551212}sofia/internal/sip:1000@192.168.1.1:58289 9386 XML default
     originate {origination_caller_id_number=9005551212}sofia/default/whatever@wherever 19005551212 XML default
+    originate {origination_caller_id_number=1000}sofia/external/sip:1000@192,168,1,1:49603 5000 XML default
+    originate sofia/external/sip:1000@192.168.1.1:49603 5000 XML default
    ```
 
 4. Note: Depending on the FreeSWITCH events being published, the result of the `originate` command may, or may not be sent to the MQTT client.
@@ -609,8 +611,8 @@ The event names used here are the same as those defined in `switch_event_types_t
     <topic name="Multiple">
       <param name="enable" value="false"/>
       <param name="connection_name" value="mqtt_broker"/>
-      <param name="event" value="HEARTBEAT"/>
-      <param name="event" value="RE_SCHEDULE"/>
+      <param name="event" value="CHANNEL_ANSWER"/>
+      <param name="event" value="CHANNEL_HANGUP"/>
       <param name="pattern" value="FreeSWITCH/MULTIPLE"/>
       <param name="qos" value="0"/>
       <param name="retain" value="false"/>
