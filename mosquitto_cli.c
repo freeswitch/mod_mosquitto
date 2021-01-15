@@ -765,6 +765,8 @@ static switch_status_t cmd_status(char **argv, int argc, switch_stream_handle_t 
 				stream->write_function(stream, "		  retain: %s\n", topic->retain ? "True" : "False");
 				stream->write_function(stream, "		  originate_authorized: %s\n",
 									   topic->originate_authorized ? "True" : "False");
+				stream->write_function(stream, "		  bgapi_authorized: %s\n",
+									   topic->bgapi_authorized ? "True" : "False");
 			}
 		}
 	}
