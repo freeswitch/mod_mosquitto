@@ -5,13 +5,13 @@ name: unit-tests
 steps:
     - name: bootstrap
       image: signalwire/freeswitch-public-base
-      pull: true
+      pull: always
       commands:
       - ./bootstrap.sh
 
     - name: configure make and check
       image: signalwire/freeswitch-public-base
-      pull: true
+      pull: always
       commands:
       - export WORK_DIR=$PWD
       - echo $WORK_DIR
@@ -41,7 +41,7 @@ steps:
 
     - name: notify
       image: signalwire/drone-notify
-      pull: true
+      pull: always
       environment:
         SLACK_WEBHOOK_URL:
           from_secret: slack_webhook_url
@@ -64,7 +64,7 @@ name: scan-build
 steps:
     - name: scan-build
       image: signalwire/freeswitch-public-base
-      pull: true
+      pull: always
       commands:
       - apt-get update
       - DEBIAN_FRONTEND=noninteractive apt-get -yq install clang-tools-7
@@ -85,7 +85,7 @@ steps:
 
     - name: notify
       image: signalwire/drone-notify
-      pull: true
+      pull: always
       environment:
         SLACK_WEBHOOK_URL:
           from_secret: slack_webhook_url
@@ -102,6 +102,6 @@ trigger:
   - push
 ---
 kind: signature
-hmac: ecfe3205d9ab8cafff8176b8ca20c096783dd81463042749360a26295a950467
+hmac: 626882311e28f43ea6d6edb2ca733811fcc47577691bfafaec1d56ed2000b311
 
 ...
