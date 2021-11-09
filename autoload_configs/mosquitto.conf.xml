@@ -32,11 +32,11 @@
                     <param name="protocol_version" value="V311"/>
                     <param name="receive_maximum" value="20"/>
                     <param name="send_maximum" value="20"/>
-                    <param name="host" value="mqtt.broker1.example.com"/>
+                    <param name="host" value="[BROKER1_HOST]"/>
                     <param name="port" value="1884"/>
                     <param name="keepalive" value="10"/>
-                    <param name="username" value="[REDACTED]"/>
-                    <param name="password" value="[REDACTED]"/>
+                    <param name="username" value="[BROKER1_USERNAME]"/>
+                    <param name="password" value="[BROKER1_PASSWORD]"/>
                     <param name="client_id" value="FreeSWITCH-Switchname-Unique"/>
                     <param name="clean_session" value="false"/>
                     <param name="retries" value="3"/>
@@ -75,11 +75,11 @@
                     <param name="protocol_version" value="V311"/>
                     <param name="receive_maximum" value="20"/>
                     <param name="send_maximum" value="20"/>
-                    <param name="host" value="mqtt.broker2.com"/>
+                    <param name="host" value="[BROKER2_HOST]"/>
                     <param name="port" value="1884"/>
                     <param name="keepalive" value="10"/>
-                    <param name="username" value="[REDACTED]"/>
-                    <param name="password" value="[REDACTED]"/>
+                    <param name="username" value="[BROKER2_USERNAME]"/>
+                    <param name="password" value="[BROKER2_PASSWORD]"/>
                     <param name="client_id" value="FreeSWITCH-Switchname-Unique"/>
                     <param name="clean_session" value="false"/>
                     <param name="retries" value="3"/>
