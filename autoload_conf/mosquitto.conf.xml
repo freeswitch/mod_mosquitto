@@ -166,7 +166,7 @@
                             <param name="pattern" value="FreeSWITCH/command"/>
                             <param name="qos" value="0"/>
 <!-- WARNING: THE FOLLOWING TWO SETTINGS WILL ALLOW THE MQTT BROKER TO INITIATE PHONE CALLS -->
-<!-- WARNING: Setting either of these permissons to true WILL allow phone calls to be initiated by the MQTT broker to FreeSWITCH. -->
+<!-- WARNING: Setting either of these permissions to true WILL allow phone calls to be initiated by the MQTT broker to FreeSWITCH. -->
 <!-- WARNING: If the connected MQTT broker is not locked down, toll fraud WILL HAPPEN by bad actors. -->
 <!-- WARNING: REPEATED: If the connected MQTT broker is not locked down, toll fraud WILL HAPPEN by bad actors. -->
 <!-- WARNING: REPEATED A THIRD TIME: If the connected MQTT broker is not locked down, toll fraud WILL HAPPEN by bad actors. -->
