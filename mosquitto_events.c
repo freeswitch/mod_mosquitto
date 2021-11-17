@@ -151,7 +151,7 @@ void event_handler(switch_event_t *event)
 	 * qos			Integer value 0, 1 or 2 indicating the Quality of Service to be used for the message.
 	 * retain		Set to true to make the message retained.
 	 */
-	rc = mosquitto_publish(connection->mosq, &topic->mid, topic->pattern, strlen(buf) + 1, buf, topic->qos,
+	rc = mosquitto_publish(connection->mosq, &topic->mid, topic->pattern, strlen(buf), buf, topic->qos,
 						   topic->retain);
 
 	mosq_publish_results(profile, connection, topic, rc);
