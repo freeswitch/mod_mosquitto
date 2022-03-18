@@ -12,13 +12,19 @@ steps:
     - name: configure make and check
       image: signalwire/freeswitch-public-base
       pull: always
+      environment:
+        REPOTOKEN:
+          from_secret: repotoken
       commands:
       - export WORK_DIR=$PWD
       - echo $WORK_DIR
+      - echo "machine freeswitch.signalwire.com password $REPOTOKEN" > /etc/apt/auth.conf
       - echo "deb http://ftp.de.debian.org/debian testing main" > /etc/apt/sources.list
       - apt-get update
       - apt-get -y -t testing install libmosquitto-dev
       - apt-get -y install libfreeswitch-dev freeswitch-mod-console
+      - export REPOTOKEN=''
+      - rm -rf /etc/apt/auth.conf
       - ./bootstrap.sh
       - ./configure
       - echo '#!/bin/bash\nmake -j`nproc --all` |& tee $WORK_DIR/unit-tests-build-result.txt\nexitstatus=$${PIPESTATUS[0]}\necho $$exitstatus > $WORK_DIR/build-status.txt\n' > build.sh
@@ -65,13 +71,19 @@ steps:
     - name: scan-build
       image: signalwire/freeswitch-public-base
       pull: always
+      environment:
+        REPOTOKEN:
+          from_secret: repotoken
       commands:
+      - echo "machine freeswitch.signalwire.com password $REPOTOKEN" > /etc/apt/auth.conf
       - apt-get update
       - DEBIAN_FRONTEND=noninteractive apt-get -yq install clang-tools-7
       - echo "deb http://ftp.de.debian.org/debian testing main" > /etc/apt/sources.list
       - apt-get update
       - apt-get -y -t testing install libmosquitto-dev
       - apt-get -y install libfreeswitch-dev freeswitch-mod-console
+      - export REPOTOKEN=''
+      - rm -rf /etc/apt/auth.conf
       - export WORK_DIR=$PWD
       - echo $WORK_DIR
       - ./bootstrap.sh
@@ -102,6 +114,6 @@ trigger:
   - push
 ---
 kind: signature
-hmac: 626882311e28f43ea6d6edb2ca733811fcc47577691bfafaec1d56ed2000b311
+hmac: 852b025750fbcd66136d7cb265df78227042a93ec6d9cb9826a765eabd6b43d8
 
 ...
